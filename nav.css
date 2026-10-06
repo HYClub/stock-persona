@@ -1,0 +1,36 @@
+/* 全站统一导航 —— 六个页面共用，位置/条目/尺寸完全一致 */
+:root{ --navh:46px; }
+
+#topnav{
+  position:fixed; top:0; left:0; right:0; height:var(--navh); z-index:99999;
+  display:flex; align-items:center; gap:3px; padding:0 16px;
+  background:linear-gradient(180deg,rgba(26,17,13,.97),rgba(11,7,5,.99));
+  border-bottom:1px solid rgba(217,164,65,.28);
+  box-shadow:0 4px 18px rgba(0,0,0,.7);
+  font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  font-size:12.5px; line-height:1;
+  -webkit-font-smoothing:antialiased;
+}
+#topnav .brand{
+  font-family:"Songti SC","STSong",Georgia,serif; font-size:14.5px; letter-spacing:.18em;
+  color:#f0d878; margin-right:16px; white-space:nowrap;
+}
+#topnav a{
+  color:#a8967c; text-decoration:none; padding:7px 11px; border-radius:3px;
+  border:1px solid transparent; white-space:nowrap; transition:.13s;
+}
+#topnav a:hover{ color:#f0d878; border-color:rgba(217,164,65,.42); background:rgba(217,164,65,.09); }
+#topnav a.on{
+  color:#2c1a04; border-color:#8a6520;
+  background:linear-gradient(180deg,#f0d878,#c9a13f);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
+}
+#topnav .sp{ flex:1; }
+#topnav a.home{ color:#d9a441; border-color:rgba(217,164,65,.3); }
+#topnav a.home:hover{ background:rgba(217,164,65,.14); }
+
+/* 窄屏：允许横向滚动，别把条目挤没 */
+@media (max-width:1080px){
+  #topnav{ overflow-x:auto; }
+  #topnav::-webkit-scrollbar{ height:0; }
+}

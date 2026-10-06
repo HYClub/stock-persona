@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>样式四 · 手牌</title>
+<link rel="stylesheet" href="nav.css" />
+<style>
+  :root{
+    --gold:#d9a441; --gold2:#f0d878; --goldD:#7a5f1c;
+    --red:#d84a52; --grn:#35c48a; --pur:#b07ae0;
+    --tx:#efe6d6; --dim:#a8967c; --faint:#6b5b46;
+    --serif:"Songti SC","STSong","SimSun",Georgia,serif;
+    --sans:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    --mono:ui-monospace,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#050303;color:var(--tx);font-family:var(--sans)}
+  #stage{position:fixed;inset:46px 0 0 0;display:grid;place-items:center}
+  .screen{position:relative;width:1600px;height:940px;overflow:hidden;border-radius:10px;
+    background:radial-gradient(80% 70% at 50% 20%,#241016,#0b0508 62%,#050203);
+    border:1px solid #54401f;box-shadow:0 30px 80px rgba(0,0,0,.95);transform-origin:center}
+
+  /* 顶栏 */
+  .hud{position:absolute;top:0;left:0;right:0;z-index:8;height:52px;display:flex;align-items:center;gap:16px;
+    padding:0 24px;border-bottom:1px solid rgba(217,164,65,.2);background:rgba(8,4,6,.7)}
+  .hud .c{font-family:var(--serif);font-size:14px;letter-spacing:.14em;color:var(--gold2)}
+  .hud .c small{font-family:var(--sans);font-size:11px;color:var(--dim);margin-left:8px;letter-spacing:.08em}
+  .sp{flex:1}
+  .res{display:flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.14em;color:var(--dim)}
+  .pips{display:flex;gap:3px}
+  .pips i{width:10px;height:15px;border-radius:2px;border:1px solid rgba(216,74,82,.45);background:rgba(255,255,255,.05)}
+  .pips.heart i{border-color:rgba(240,216,120,.4)}
+  .pips.heart i.on{background:linear-gradient(180deg,#ffe9a8,#d9a441);border-color:#f0d878;box-shadow:0 0 8px rgba(240,216,120,.8)}
+  .pips.greed i{transform:skewX(-10deg)}
+  .pips.greed i.on{background:linear-gradient(180deg,#ff6a72,#8c1018);border-color:#ffb0b5;box-shadow:0 0 9px rgba(255,90,99,.85)}
+  .chip{font-family:var(--mono);font-size:14px;font-weight:900;color:var(--gold2)}
+
+  /* 异闻的大牌 —— 顶在上半屏 */
+  .boss{position:absolute;left:50%;top:70px;transform:translateX(-50%);width:440px;
+    border:1px solid var(--goldD);border-radius:8px;overflow:hidden;
+    background:linear-gradient(180deg,rgba(30,10,16,.92),rgba(10,4,6,.97));
+    box-shadow:0 0 60px rgba(216,74,82,.25),0 24px 60px rgba(0,0,0,.8)}
+  .boss .art{height:250px;background-size:cover;background-position:center;
+    -webkit-mask-image:linear-gradient(180deg,#000 62%,transparent);mask-image:linear-gradient(180deg,#000 62%,transparent)}
+  .boss .nm{position:absolute;top:14px;left:18px;font-family:var(--serif);font-size:19px;letter-spacing:.14em;
+    color:#ffd0d4;text-shadow:0 2px 10px #000}
+  .boss .hpwrap{position:absolute;left:20px;right:20px;bottom:14px}
+  .boss .hpwrap .lb{display:flex;justify-content:space-between;font-size:11.5px;color:#ffb0b5;
+    font-family:var(--mono);letter-spacing:.1em;margin-bottom:5px}
+  .boss .bar{height:11px;border-radius:6px;background:rgba(0,0,0,.65);overflow:hidden;border:1px solid rgba(216,74,82,.45)}
+  .boss .bar i{display:block;height:100%;background:linear-gradient(90deg,#7a1018,#e2434e 60%,#ff8f8f);
+    box-shadow:0 0 14px rgba(226,67,78,.8);transition:width .5s}
+
+  /* 旁白条 */
+  .saybar{position:absolute;left:50%;top:352px;transform:translateX(-50%);width:900px;min-height:130px;
+    border:1px solid rgba(217,164,65,.28);border-radius:6px;padding:20px 28px;
+    background:linear-gradient(180deg,rgba(20,12,10,.9),rgba(8,5,5,.95))}
+  .saybar .who{font-size:11px;letter-spacing:.2em;color:#ff9aa1;margin-bottom:8px}
+  .saybar .tx{font-family:var(--serif);font-size:18px;line-height:2;color:#f0e7d6}
+  .saybar .as{margin-top:8px;font-size:12.5px;color:var(--dim);line-height:1.8}
+  .cur{display:inline-block;width:9px;height:18px;background:var(--gold2);vertical-align:-3px;animation:bl .9s steps(1) infinite}
+  @keyframes bl{50%{opacity:0}}
+
+  /* 左右两边的小面板 */
+  .side{position:absolute;top:70px;width:230px;border:1px solid rgba(217,164,65,.22);border-radius:6px;
+    padding:14px;background:linear-gradient(180deg,rgba(24,15,11,.85),rgba(10,6,5,.9))}
+  .side.l{left:26px} .side.r{right:26px}
+  .side h5{font-size:10.5px;letter-spacing:.22em;color:var(--gold);font-weight:400;margin-bottom:10px}
+  .at{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:4px 0;border-bottom:1px dotted rgba(58,44,28,.8)}
+  .at:last-child{border-bottom:0}
+  .at .n{flex:1;color:var(--tx)}
+  .at .bar{width:48px;height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden}
+  .at .bar i{display:block;height:100%;background:linear-gradient(90deg,#8a6520,#f0d878)}
+  .at .v{font-family:var(--mono);font-size:16px;font-weight:900;color:var(--gold2)}
+  .items{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .it{position:relative;aspect-ratio:1;border-radius:5px;display:grid;place-items:center;cursor:pointer;
+    border:1px solid rgba(217,164,65,.3);
+    background:radial-gradient(60% 50% at 50% 34%,rgba(217,164,65,.2),transparent 72%),rgba(30,18,12,.7)}
+  .it img{width:60%;height:60%;mix-blend-mode:screen;filter:brightness(1.5) drop-shadow(0 0 8px rgba(217,164,65,.8))}
+  .it .n{position:absolute;right:3px;bottom:2px;font-family:var(--mono);font-size:11px;color:var(--gold2)}
+  .it.off{opacity:.28;filter:grayscale(.85)}
+  .log{font-family:var(--mono);font-size:11px;line-height:1.85;color:#9a8b6f}
+  .log div{padding:3px 0;border-bottom:1px dotted rgba(58,44,28,.7)}
+  .log .ok{color:#7ff0c0} .log .no{color:#ff9aa1} .log .cr{color:var(--gold2)}
+
+  /* 手牌 */
+  .handzone{position:absolute;left:0;right:0;bottom:0;height:260px;z-index:9}
+  .handzone .lb{position:absolute;left:0;right:0;top:6px;text-align:center;font-size:11px;
+    letter-spacing:.26em;color:var(--gold);opacity:.85}
+  .hand{position:absolute;left:50%;bottom:36px;transform:translateX(-50%);display:flex;align-items:flex-end}
+  .hcard{position:relative;width:196px;height:236px;margin:0 -20px;cursor:pointer;border-radius:8px;
+    border:1px solid var(--goldD);padding:16px 15px 14px;display:flex;flex-direction:column;gap:9px;
+    background:linear-gradient(172deg,rgba(48,28,16,.97),rgba(18,10,6,.99));
+    box-shadow:0 18px 40px rgba(0,0,0,.8);
+    transform-origin:bottom center;transform:rotate(var(--r)) translateY(var(--y));
+    transition:transform .16s, box-shadow .16s, border-color .16s}
+  .hcard:hover{transform:rotate(0deg) translateY(-34px) scale(1.05);z-index:3;border-color:var(--gold2);
+    box-shadow:0 0 46px rgba(217,164,65,.5),0 26px 50px rgba(0,0,0,.85)}
+  .hcard .ico{width:44px;height:44px;margin:0 auto;mix-blend-mode:screen;filter:brightness(1.5) drop-shadow(0 0 8px rgba(217,164,65,.7))}
+  .hcard .t{font-family:var(--serif);font-size:16px;color:var(--gold2);text-align:center;letter-spacing:.04em}
+  .hcard .d{font-size:11.5px;line-height:1.7;color:var(--dim);flex:1}
+  .hcard .f{margin-top:auto;display:flex;align-items:center;justify-content:space-between;
+    font-family:var(--mono);font-size:11px;color:var(--gold);border-top:1px solid rgba(217,164,65,.28);padding-top:8px}
+  .hcard .dc{font-size:15px;font-weight:900;color:var(--tx)}
+  .hcard.risk{border-color:rgba(216,74,82,.6)}
+  .hcard.good{border-color:rgba(53,196,138,.45)}
+  .hcard::after{content:"";position:absolute;inset:4px;border:1px solid rgba(217,164,65,.18);border-radius:5px;pointer-events:none}
+
+  /* 打出去的牌 */
+  .played{position:absolute;left:50%;top:330px;transform:translate(-50%,0) scale(.4) rotate(-8deg);
+    width:230px;z-index:30;opacity:0;pointer-events:none;transition:.28s cubic-bezier(.2,.9,.3,1.2)}
+  .played.on{opacity:1;transform:translate(-50%,0) scale(1) rotate(-2deg)}
+
+  /* 骰子 */
+  .dice{position:absolute;left:50%;top:300px;transform:translate(-50%,0) scale(.5);z-index:31;
+    width:180px;height:180px;opacity:0;pointer-events:none;transition:.28s cubic-bezier(.2,.9,.3,1.2)}
+  .dice.on{opacity:1;transform:translate(-50%,0) scale(1)}
+  .dice.shake{animation:sh .1s linear infinite}
+  @keyframes sh{0%{transform:translate(-50%,0) scale(1) rotate(-8deg)}50%{transform:translate(-50%,-8px) scale(1) rotate(8deg)}100%{transform:translate(-50%,0) scale(1) rotate(-8deg)}}
+
+  /* 结果板 */
+  .result{position:absolute;left:50%;top:500px;transform:translateX(-50%);width:820px;z-index:32;
+    border:1px solid var(--goldD);border-radius:8px;padding:24px 30px;opacity:0;pointer-events:none;transition:.24s;
+    background:linear-gradient(180deg,rgba(26,16,10,.97),rgba(8,5,4,.99));box-shadow:0 0 70px rgba(0,0,0,.9)}
+  .result.on{opacity:1;pointer-events:auto}
+  .result .v{font-family:var(--serif);font-size:26px;letter-spacing:.3em;color:#7ff0c0}
+  .result .v.no{color:#ff8f8f} .result .v.crit{color:#fff3c8;text-shadow:0 0 30px rgba(255,243,200,.7)}
+  .result .eq{margin-top:7px;font-family:var(--mono);font-size:13px;color:var(--dim)}
+  .result .tx{margin-top:14px;font-family:var(--serif);font-size:18px;line-height:2;color:#e8dcc6}
+  .result .ef{margin-top:12px;font-family:var(--mono);font-size:13px;color:var(--gold)}
+  .result .go{margin-top:18px;text-align:right}
+  .btn{display:inline-block;padding:11px 30px;cursor:pointer;border:1px solid var(--goldD);border-radius:4px;
+    font-family:var(--serif);font-size:14px;letter-spacing:.16em;color:#2c1a04;
+    background:linear-gradient(180deg,#f7e3a1,#d3a63f 46%,#9c7520);box-shadow:0 4px 0 #5c450e}
+  .btn:hover{filter:brightness(1.08)}
+  .dim{position:absolute;inset:0;z-index:25;background:rgba(3,2,2,.66);opacity:0;pointer-events:none;transition:.24s}
+  .dim.on{opacity:1;pointer-events:auto}
+
+  .end{position:absolute;inset:0;z-index:40;display:none;flex-direction:column;align-items:center;justify-content:center;
+    gap:18px;background:rgba(4,2,3,.94)}
+  .end.on{display:flex}
+  .end .t{font-family:var(--serif);font-size:44px;letter-spacing:.3em}
+  .end .d{font-family:var(--serif);font-size:17px;line-height:2.2;color:#ded3bf;text-align:center;max-width:680px}
+  .back{position:absolute;right:22px;bottom:276px;z-index:12;font-size:12px;color:var(--dim);cursor:pointer;
+    border:1px solid #3a2c1c;border-radius:3px;padding:6px 14px;background:rgba(10,6,5,.8)}
+  .back:hover{color:var(--gold);border-color:var(--goldD)}
+</style>
+</head>
+<body>
+<div id="stage">
+<div class="screen" id="screen">
+  <div class="hud">
+    <div class="c" id="chap">第一章 · 第七层<small id="room">三号厅</small></div>
+    <span class="sp"></span>
+    <div class="res">心 态<div class="pips heart" id="pHp"></div></div>
+    <div class="res">贪 婪<div class="pips greed" id="pGreed"></div></div>
+    <div class="res"><span class="chip"><span style="font-size:11px;color:var(--dim);margin-right:6px">筹码</span><span id="nChip">3</span></span></div>
+  </div>
+
+  <div class="boss" id="boss" style="display:none">
+    <div class="art" id="bossArt"></div>
+    <div class="nm" id="bossNm">对 倒 幽 灵</div>
+    <div class="hpwrap">
+      <div class="lb"><span>执 念</span><span id="bossHp">5 / 8</span></div>
+      <div class="bar"><i id="bossBar" style="width:62%"></i></div>
+    </div>
+  </div>
+
+  <div class="saybar">
+    <div class="who" id="who">主 持 人 · 大 A</div>
+    <div class="tx" id="say"></div>
+    <div class="as" id="aside"></div>
+  </div>
+
+  <div class="side l">
+    <h5>无 名 散 户</h5>
+    <div id="attrs"></div>
+  </div>
+
+  <div class="side r">
+    <h5>道 具</h5>
+    <div class="items" id="items"></div>
+    <h5 style="margin-top:16px">掷 骰 记 录</h5>
+    <div class="log" id="rollLog"><div style="color:var(--faint)">还没有掷过骰。</div></div>
+  </div>
+
+  <div class="handzone">
+    <div class="lb" id="handLb">你 可 以 打 出 的 行 动</div>
+    <div class="hand" id="hand"></div>
+  </div>
+
+  <div class="played" id="played"></div>
+  <div class="dice" id="dice"></div>
+  <div class="dim" id="dim"></div>
+  <div class="result" id="result">
+    <div class="v" id="rV"></div>
+    <div class="eq" id="rEq"></div>
+    <div class="tx" id="rT"></div>
+    <div class="ef" id="rE"></div>
+    <div class="go"><span class="btn" onclick="closeIt()">继 续 ▸</span></div>
+  </div>
+
+  <div class="end" id="end">
+    <div class="t" id="endT"></div>
+    <div class="d" id="endD"></div>
+    <div style="display:flex;gap:12px;margin-top:8px">
+      <span class="btn" onclick="restart()">再 走 一 遍</span>
+      <span class="btn" style="background:none;color:var(--gold);box-shadow:none" onclick="location.href='style-index.html'">换 个 样 式</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="engine.js"></script>
+<script>
+const Q=(s)=>document.querySelector(s);
+const S=GAME.newState();
+let busy=false, typing=null;
+
+function fit(){const s = Math.min(innerWidth / 1620, (innerHeight - 46) / 960);Q('#screen').style.transform='scale('+s+')';}
+addEventListener('resize',fit);fit();
+
+function dieSVG(n,st){
+  const g = st==='crit'?['#fffbe8','#f2d071','#b8860b']:st==='no'?['#e8a0a8','#a3232b','#5e1016']:['#fdf3d8','#e2cd9c','#a98c56'];
+  const ink = st==='no'?'#fff2f3':'#2b2013';
+  const u='g'+Math.random().toString(36).slice(2,7);
+  return `<svg viewBox="0 0 200 200" style="width:100%;height:100%">
+    <defs><linearGradient id="${u}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${g[0]}"/><stop offset=".46" stop-color="${g[1]}"/><stop offset="1" stop-color="${g[2]}"/></linearGradient></defs>
+    <polygon points="100,6 170,46 170,154 100,194 30,154 30,46" fill="url(#${u})" stroke="#6b5230" stroke-width="3"/>
+    <polygon points="100,6 170,46 100,100" fill="rgba(255,255,255,.34)"/>
+    <polygon points="170,46 170,154 100,100" fill="rgba(0,0,0,.07)"/>
+    <polygon points="170,154 100,194 100,100" fill="rgba(0,0,0,.15)"/>
+    <polygon points="100,194 30,154 100,100" fill="rgba(0,0,0,.22)"/>
+    <polygon points="30,154 30,46 100,100" fill="rgba(0,0,0,.1)"/>
+    <polygon points="30,46 100,6 100,100" fill="rgba(255,255,255,.18)"/>
+    <text x="100" y="122" text-anchor="middle" font-family="ui-monospace,monospace"
+      font-size="${String(n).length>1?74:86}" font-weight="900" fill="${ink}">${n}</text></svg>`;
+}
+function pips(el,n,max){el.innerHTML=Array.from({length:max},(_,i)=>`<i class="${i<n?'on':''}"></i>`).join('');}
+
+function render(){
+  pips(Q('#pHp'),S.hp,S.hpMax); pips(Q('#pGreed'),S.greed,S.greedMax);
+  Q('#nChip').textContent=S.chip;
+  Q('#attrs').innerHTML=Object.entries(S.attrs).map(([k,v])=>
+    `<div class="at"><span class="n">${k}</span><span class="bar"><i style="width:${v*20}%"></i></span><span class="v">${v}</span></div>`).join('');
+  Q('#items').innerHTML=Object.entries(GAME.ITEMS).map(([k,d])=>{
+    const n=S.items[k]||0;
+    return `<div class="it${n?'':' off'}" title="${d.name} · ${d.desc}"><img src="${d.img}"/><span class="n">${n}</span></div>`;
+  }).join('');
+  // 主牌一直在：有异闻就是异闻（带执念条），没有就是主持人（不带）
+  Q('#boss').style.display='block';
+  Q('#bossArt').style.backgroundImage=`url('${GAME.BEATS[S.beat].art}')`;
+  Q('#bossNm').textContent=GAME.BEATS[S.beat].who;
+  Q('#boss').querySelector('.hpwrap').style.display = S.obs ? 'block' : 'none';
+  if(S.obs){
+    Q('#bossHp').textContent=Math.max(0,S.obs.cur)+' / '+S.obs.max;
+    Q('#bossBar').style.width=Math.max(0,S.obs.cur/S.obs.max*100)+'%';
+  }
+  Q('#rollLog').innerHTML = S.log.length ? S.log.slice(0,6).map(l=>`<div class="${l.tone}">${l.text}</div>`).join('')
+    : '<div style="color:var(--faint)">还没有掷过骰。</div>';
+}
+function typeInto(el,text,done){
+  clearInterval(typing); let i=0;
+  el.innerHTML='<span class="cur"></span>';
+  typing=setInterval(()=>{
+    i+=2; if(i%6===0) GAME.sfx('tick');
+    el.innerHTML=text.slice(0,i).replace(/\n/g,'<br>')+'<span class="cur"></span>';
+    if(i>=text.length){clearInterval(typing);el.innerHTML=text.replace(/\n/g,'<br>');done&&done();}
+  },16);
+}
+function playBeat(){
+  const b=GAME.BEATS[S.beat];
+  busy=true;
+  S.obs = b.obs?{cur:b.obs.cur,max:b.obs.max}:null;
+  Q('#who').textContent=b.who;
+  Q('#aside').textContent='';
+  Q('#hand').innerHTML='';
+  Q('#handLb').textContent='…';
+  render();
+  typeInto(Q('#say'),b.text,()=>{
+    Q('#aside').textContent=b.aside||'';
+    dealHand(b.acts);
+    busy=false;
+  });
+}
+function dealHand(acts){
+  Q('#handLb').textContent='你 可 以 打 出 的 行 动';
+  const n=acts.length;
+  const spread=Math.min(16,(n-1)*5);
+  Q('#hand').innerHTML=acts.map((a,i)=>{
+    const t=n>1?i/(n-1)-.5:0;
+    const r=(t*spread).toFixed(1), y=Math.abs(t)*26+8;
+    const risk=a.dc>=16?' risk':a.dc<=11?' good':'';
+    return `<div class="hcard${risk}" style="--r:${r}deg;--y:${y}px" onclick="play(${i})">
+      <div class="t">${a.t}</div>
+      <div class="d">${a.d}</div>
+      <div class="f"><span>${a.attr}</span><span class="dc">${a.dc}</span></div>
+    </div>`;
+  }).join('');
+}
+function play(i){
+  if(busy) return; busy=true;
+  GAME.sfx('click');
+  const act=GAME.BEATS[S.beat].acts[i];
+  const res=GAME.roll(S,act);
+  const card=Q('#hand').children[i].cloneNode(true);
+  Q('#hand').innerHTML='';
+  Q('#handLb').textContent='检 定 中 …';
+  const p=Q('#played');
+  p.innerHTML=''; p.appendChild(card);
+  p.classList.add('on');
+  GAME.sfx('tick');
+
+  const dice=Q('#dice');
+  setTimeout(()=>{
+    p.classList.remove('on');
+    dice.classList.add('on'); dice.classList.add('shake');
+    let n=0;
+    const spin=setInterval(()=>{
+      const f=1+Math.floor(Math.random()*20);
+      dice.innerHTML=dieSVG(f,'roll'); GAME.sfx('tick');
+      if(++n>12){clearInterval(spin);settle();}
+    },60);
+  },260);
+
+  function settle(){
+    const o=GAME.outcome(S,act,res);
+    GAME.apply(S,o.eff);
+    dice.classList.remove('shake');
+    dice.innerHTML=dieSVG(res.r,res.crit?'crit':res.pass?'ok':'no');
+    Q('#dim').classList.add('on');
+    const r=Q('#result'); r.classList.add('on');
+    const v=Q('#rV');
+    v.textContent=o.verdict;
+    v.className='v '+(res.crit?'crit':res.pass?'':'no');
+    Q('#rEq').textContent=`${res.attr} ${res.r} + ${res.mod} = ${res.total}   vs   难度 ${res.dc}`;
+    Q('#rT').textContent=o.text;
+    Q('#rE').textContent=GAME.effText(o.eff)?'· '+GAME.effText(o.eff):'';
+    S.log.unshift({tone:res.crit?'cr':res.pass?'ok':'no',
+      text:`${act.attr} ${res.r}+${res.mod}=${res.total} vs ${res.dc} · ${o.verdict}`});
+    render();
+    if(res.crit) GAME.sfx('crit'); else if(res.pass) GAME.sfx('ok'); else GAME.sfx('no');
+  }
+}
+function closeIt(){
+  GAME.sfx('click');
+  Q('#result').classList.remove('on');
+  Q('#dim').classList.remove('on');
+  Q('#dice').classList.remove('on');
+  busy=false;
+  const e=GAME.ending(S);
+  if(e) return showEnd(e);
+  const b=GAME.BEATS[S.beat];
+  if(b.obs && S.obs && S.obs.cur>0) return playBeat();
+  S.beat++;
+  if(S.beat>=GAME.BEATS.length) return showEnd(GAME.ending(S));
+  playBeat();
+}
+function showEnd(e){
+  Q('#endT').textContent=e.t;
+  Q('#endT').style.color=e.tone==='bad'?'#ff8f8f':e.tone==='good'?'#7ff0c0':'#f0d878';
+  Q('#endD').textContent=e.d; Q('#end').classList.add('on');
+}
+function restart(){Object.assign(S,GAME.newState());Q('#end').classList.remove('on');playBeat();}
+addEventListener('keydown',(e)=>{
+  if(Q('#result').classList.contains('on')){if(e.key===' '||e.key==='Enter'){e.preventDefault();closeIt();}return;}
+  if(/^[1-9]$/.test(e.key)){const el=Q('#hand').children[+e.key-1];if(el)el.click();}
+});
+render();playBeat();
+</script>
+<script src="nav.js"></script>
+</body>
+</html>

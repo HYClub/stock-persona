@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>样式二 · 桌面俯视</title>
+<link rel="stylesheet" href="nav.css" />
+<style>
+  :root{
+    --gold:#d9a441; --gold2:#f0d878; --goldD:#7a5f1c;
+    --red:#d84a52; --grn:#35c48a;
+    --tx:#efe6d6; --dim:#a8967c; --faint:#6b5b46;
+    --serif:"Songti SC","STSong","SimSun",Georgia,serif;
+    --sans:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    --mono:ui-monospace,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#050303;color:var(--tx);font-family:var(--sans)}
+  #stage{position:fixed;inset:46px 0 0 0;display:grid;place-items:center}
+  .screen{position:relative;width:1600px;height:940px;overflow:hidden;border-radius:10px;
+    border:1px solid #3a2c1c;box-shadow:0 30px 80px rgba(0,0,0,.95);transform-origin:center}
+
+  /* ═══ 桌面 ═══ */
+  .table{position:absolute;inset:0;background-image:url('img/wood-dark.jpg');
+    background-size:420px;filter:brightness(.5) saturate(1.1)}
+  .lamp{position:absolute;inset:0;
+    background:radial-gradient(46% 44% at 22% 16%,rgba(255,196,110,.3),transparent 66%),
+               radial-gradient(80% 70% at 50% 50%,transparent 30%,rgba(0,0,0,.78) 100%)}
+  .grain{position:absolute;inset:0;opacity:.1;mix-blend-mode:overlay;
+    background-image:radial-gradient(rgba(255,240,210,.6) 1px,transparent 1px);background-size:3px 3px}
+
+  /* ═══ 桌上的东西：都带一点旋转和投影，像真的摊在那儿 ═══ */
+  .obj{position:absolute;border-radius:3px;box-shadow:0 14px 30px rgba(0,0,0,.7),0 2px 6px rgba(0,0,0,.6)}
+
+  /* 角色卡（羊皮纸） */
+  .sheet{left:44px;top:52px;width:300px;transform:rotate(-2.1deg);padding:16px 17px;color:#2c1f10;
+    border:1px solid #8a7448;
+    background:
+      radial-gradient(120% 90% at 30% 10%,rgba(255,252,240,.9),transparent 60%),
+      radial-gradient(90% 70% at 80% 90%,rgba(150,110,50,.3),transparent 70%),
+      repeating-linear-gradient(94deg,rgba(120,90,40,.05) 0 1px,transparent 1px 4px),
+      linear-gradient(168deg,#f6ecd4,#e2d0a6 42%,#cbb488 78%,#b9a37c)}
+  .sheet h5{display:flex;font-size:11px;letter-spacing:.2em;color:#7d6434;font-weight:400;
+    border-bottom:1px solid rgba(120,90,40,.35);padding-bottom:7px;margin-bottom:8px}
+  .sheet h5 .sp{flex:1}
+  .at{display:flex;align-items:center;gap:9px;font-size:13px;padding:5px 0;border-bottom:1px dotted rgba(120,90,40,.28)}
+  .at:last-child{border-bottom:0}
+  .at .n{flex:1;color:#4a3a1e}
+  .at .n small{display:block;color:#8d7443;font-size:10px;margin-top:1px}
+  .at .v{font-family:var(--mono);font-size:19px;font-weight:900;color:#7d1219}
+
+  /* 道具筹码 */
+  .tokens{left:44px;top:392px;width:300px;transform:rotate(1.4deg);padding:13px 14px;
+    border:1px solid #3a2c1c;background:linear-gradient(180deg,rgba(30,20,14,.94),rgba(14,9,6,.96))}
+  .tokens h5{font-size:10.5px;letter-spacing:.22em;color:var(--gold);font-weight:400;margin-bottom:10px}
+  .tkrow{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  .tk{position:relative;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;cursor:pointer;
+    background:radial-gradient(circle at 36% 30%,#5a4224,#241708 70%);
+    border:2px solid #6b5230;box-shadow:inset 0 2px 5px rgba(255,220,160,.2),0 6px 14px rgba(0,0,0,.7)}
+  .tk img{width:66%;height:66%;mix-blend-mode:screen;filter:brightness(1.5) drop-shadow(0 0 7px rgba(217,164,65,.8))}
+  .tk .n{position:absolute;right:-3px;bottom:-3px;min-width:20px;height:20px;border-radius:10px;
+    background:radial-gradient(circle at 34% 28%,#fdeeb9,#c9992f);color:#2c1a04;
+    font-family:var(--mono);font-size:11px;font-weight:900;display:grid;place-items:center;padding:0 4px}
+  .tk.off{opacity:.3;filter:grayscale(.85);cursor:default}
+  .tk:hover:not(.off){border-color:var(--gold2);box-shadow:0 0 22px rgba(217,164,65,.5),0 6px 14px rgba(0,0,0,.7)}
+
+  /* 异闻的照片（拍立得） */
+  .photo{left:400px;top:60px;width:330px;transform:rotate(1.7deg);padding:12px 12px 40px;
+    background:linear-gradient(170deg,#f2ead6,#d9ccb0);border:1px solid #b6a582}
+  .photo .pic{width:100%;height:352px;background-size:cover;background-position:center;
+    box-shadow:inset 0 0 30px rgba(0,0,0,.7)}
+  .photo .cap{position:absolute;left:0;right:0;bottom:10px;text-align:center;
+    font-family:var(--serif);font-size:14px;color:#4a3a1e;letter-spacing:.1em}
+  .photo .clip{position:absolute;top:-14px;right:34px;width:26px;height:52px;border:3px solid #9a9a9a;
+    border-radius:12px;border-bottom-color:transparent;transform:rotate(6deg);opacity:.85}
+
+  /* 旁白卡（索引卡） */
+  .narr{left:400px;top:498px;width:830px;min-height:290px;transform:rotate(-.7deg);padding:22px 28px;
+    background:
+      repeating-linear-gradient(180deg,transparent 0 33px,rgba(90,120,150,.16) 33px 34px),
+      linear-gradient(170deg,#f4efe0,#ded4bb);
+    border:1px solid #c0b190;color:#2c2416}
+  .narr .hd{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:15px;color:#7d1219;
+    letter-spacing:.1em;padding-bottom:10px;margin-bottom:14px;border-bottom:2px solid rgba(125,18,25,.35)}
+  .narr .hd .sp{flex:1}
+  .narr .hd small{font-family:var(--sans);font-size:11px;color:#8a7a5c;letter-spacing:.06em}
+  .narr .tx{font-family:var(--serif);font-size:19px;line-height:2.05;color:#2b2317}
+  .narr .as{margin-top:10px;font-size:13px;color:#6d6047;line-height:1.85}
+  .cursor{display:inline-block;width:9px;height:19px;background:#7d1219;vertical-align:-3px;animation:bl .9s steps(1) infinite}
+  @keyframes bl{50%{opacity:0}}
+
+  /* 骰盘 */
+  .tray{right:48px;top:188px;width:300px;height:300px;transform:rotate(2.2deg);padding:22px;
+    background:linear-gradient(180deg,#4a2f16,#2a1a0b);border:1px solid #6b5230;border-radius:8px}
+  .felt{width:100%;height:100%;border-radius:6px;display:grid;place-items:center;
+    background:radial-gradient(circle at 40% 34%,#1d3a2c,#0b1a13 76%);
+    box-shadow:inset 0 8px 22px rgba(0,0,0,.9),inset 0 -2px 4px rgba(255,220,160,.06)}
+  .die{width:150px;height:150px;filter:drop-shadow(0 10px 22px rgba(0,0,0,.85))}
+  .die.shake{animation:sh .1s linear infinite}
+  @keyframes sh{0%{transform:rotate(-8deg)}50%{transform:rotate(8deg) translateY(-5px)}100%{transform:rotate(-8deg)}}
+  .traynote{position:absolute;left:0;right:0;bottom:-34px;text-align:center;font-size:11.5px;color:#a8967c;
+    font-family:var(--mono);letter-spacing:.1em}
+
+  /* 行动卡 —— 摊在桌子下沿的一排 */
+  .hand{position:absolute;left:390px;right:380px;bottom:22px;height:150px;display:flex;gap:12px;align-items:flex-end}
+  .card{flex:1;min-width:0;height:132px;cursor:pointer;padding:13px 15px;border-radius:4px;
+    border:1px solid #6b5230;background:linear-gradient(168deg,#f4ecd8,#ded0ae);
+    box-shadow:0 14px 26px rgba(0,0,0,.75);transform:rotate(var(--rot));
+    display:flex;flex-direction:column;gap:6px;transition:.14s;color:#2c2416}
+  .card:hover{transform:rotate(0deg) translateY(-16px);border-color:var(--gold2);
+    box-shadow:0 0 34px rgba(217,164,65,.45),0 18px 30px rgba(0,0,0,.8)}
+  .card .t{font-family:var(--serif);font-size:15px;color:#231c10;line-height:1.4}
+  .card .d{font-size:11px;color:#6d6047;line-height:1.6;flex:1}
+  .card .dc{margin-top:auto;font-family:var(--mono);font-size:11px;color:#7d1219;
+    border-top:1px solid rgba(125,18,25,.28);padding-top:6px;display:flex;justify-content:space-between}
+
+  /* 顶栏 */
+  .hud{position:absolute;top:0;left:0;right:0;z-index:8;height:44px;display:flex;align-items:center;gap:14px;padding:0 22px}
+  .hud .c{font-family:var(--serif);font-size:13px;letter-spacing:.14em;color:#e8d9b8;text-shadow:0 2px 6px #000}
+  .hud .c small{font-family:var(--sans);font-size:11px;color:#b9a685;margin-left:8px}
+  .sp{flex:1}
+  .res{display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.12em;color:#c9b795;text-shadow:0 1px 4px #000}
+  .pips{display:flex;gap:3px}
+  .pips i{width:10px;height:14px;border-radius:2px;border:1px solid rgba(216,74,82,.5);background:rgba(0,0,0,.35)}
+  .pips.heart i{border-color:rgba(240,216,120,.45)}
+  .pips.heart i.on{background:linear-gradient(180deg,#ffe9a8,#d9a441);box-shadow:0 0 8px rgba(240,216,120,.8)}
+  .pips.greed i{transform:skewX(-10deg)}
+  .pips.greed i.on{background:linear-gradient(180deg,#ff6a72,#8c1018);box-shadow:0 0 9px rgba(255,90,99,.85)}
+  .chip{font-family:var(--mono);font-size:14px;font-weight:900;color:#ffe9a8;text-shadow:0 0 10px rgba(240,216,120,.5)}
+  .obs{position:absolute;left:400px;top:442px;width:830px;height:34px;display:none;align-items:center;gap:12px;
+    padding:0 16px;border-radius:17px;background:linear-gradient(180deg,#4a1218,#1c0608);
+    border:1px solid rgba(216,74,82,.55);box-shadow:0 8px 20px rgba(0,0,0,.7);z-index:7}
+  .obs.on{display:flex}
+  .obs .n{font-family:var(--serif);font-size:12.5px;color:#ffd0d4;letter-spacing:.08em}
+  .obs .bar{flex:1;height:9px;border-radius:5px;background:rgba(0,0,0,.6);overflow:hidden;border:1px solid rgba(216,74,82,.4)}
+  .obs .bar i{display:block;height:100%;background:linear-gradient(90deg,#7a1018,#e2434e 60%,#ff8f8f);transition:width .5s}
+  .obs .v{font-family:var(--mono);font-size:12.5px;color:#ffb0b5;font-weight:900}
+
+  /* 结果卡片：像一张被翻开的牌 */
+  .res-card{position:absolute;left:50%;top:50%;z-index:20;transform:translate(-50%,-50%) rotate(-1.5deg) scale(.9);
+    width:640px;padding:26px 32px;border-radius:4px;opacity:0;pointer-events:none;transition:.22s;
+    background:linear-gradient(168deg,#f7f1e2,#e2d6b8);border:1px solid #b6a582;color:#2b2317;
+    box-shadow:0 40px 80px rgba(0,0,0,.85)}
+  .res-card.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) rotate(-1.5deg) scale(1)}
+  .res-card .v{font-family:var(--serif);font-size:24px;letter-spacing:.28em;color:#7d1219}
+  .res-card .v.ok{color:#1d6b4a} .res-card .v.crit{color:#8a6520}
+  .res-card .eq{margin-top:8px;font-family:var(--mono);font-size:13px;color:#6d6047}
+  .res-card .tx{margin-top:16px;font-family:var(--serif);font-size:18px;line-height:2;color:#2b2317}
+  .res-card .ef{margin-top:14px;font-family:var(--mono);font-size:12.5px;color:#7d1219}
+  .res-card .go{margin-top:20px;text-align:right}
+  .stamp{display:inline-block;padding:10px 26px;cursor:pointer;border:2px solid #7d1219;border-radius:3px;
+    font-family:var(--serif);font-size:15px;letter-spacing:.16em;color:#7d1219;background:rgba(125,18,25,.06)}
+  .stamp:hover{background:#7d1219;color:#f4ecd8}
+  .dim{position:absolute;inset:0;z-index:19;background:rgba(3,2,2,.62);opacity:0;pointer-events:none;transition:.22s}
+  .dim.on{opacity:1;pointer-events:auto}
+
+  .end{position:absolute;inset:0;z-index:30;display:none;flex-direction:column;align-items:center;justify-content:center;
+    gap:20px;background:rgba(4,2,3,.92)}
+  .end.on{display:flex}
+  .end .t{font-family:var(--serif);font-size:44px;letter-spacing:.3em}
+  .end .d{font-family:var(--serif);font-size:17px;line-height:2.2;color:#ded3bf;text-align:center;max-width:680px}
+
+  .back{position:absolute;right:22px;bottom:22px;z-index:9;font-size:12px;color:#c9b795;cursor:pointer;
+    border:1px solid #6b5230;border-radius:3px;padding:6px 14px;background:rgba(10,6,5,.8)}
+  .back:hover{color:var(--gold2);border-color:var(--goldD)}
+</style>
+</head>
+<body>
+<div id="stage">
+<div class="screen" id="screen">
+  <div class="table"></div>
+  <div class="lamp"></div>
+  <div class="grain"></div>
+
+  <div class="hud">
+    <div class="c" id="chap">第一章 · 第七层<small id="room">三号厅</small></div>
+    <span class="sp"></span>
+    <div class="res">心 态<div class="pips heart" id="pHp"></div></div>
+    <div class="res">贪 婪<div class="pips greed" id="pGreed"></div></div>
+    <div class="res"><span class="chip"><span style="font-size:11px;color:#c9b795;margin-right:5px">筹码</span><span id="nChip">3</span></span></div>
+  </div>
+
+  <!-- 角色卡 -->
+  <div class="obj sheet">
+    <h5>无 名 散 户<span class="sp"></span>第 1 章</h5>
+    <div id="attrs"></div>
+  </div>
+
+  <!-- 道具筹码 -->
+  <div class="obj tokens">
+    <h5>道 具</h5>
+    <div class="tkrow" id="items"></div>
+  </div>
+
+  <!-- 异闻的照片 -->
+  <div class="obj photo">
+    <div class="clip"></div>
+    <div class="pic" id="pic"></div>
+    <div class="cap" id="picCap">对 倒 幽 灵</div>
+  </div>
+
+  <!-- 执念 -->
+  <div class="obs" id="obs">
+    <span class="n" id="obsName">对倒幽灵</span>
+    <div class="bar"><i id="obsBar" style="width:60%"></i></div>
+    <span class="v" id="obsNum">5 / 8</span>
+  </div>
+
+  <!-- 旁白卡 -->
+  <div class="obj narr">
+    <div class="hd"><span id="who">主 持 人 · 大 A</span><span class="sp"></span><small id="tip">它把纸推到你面前</small></div>
+    <div class="tx" id="say"></div>
+    <div class="as" id="aside"></div>
+  </div>
+
+  <!-- 骰盘 -->
+  <div class="obj tray">
+    <div class="felt"><div class="die" id="die"></div></div>
+    <div class="traynote" id="trayNote">点下面的行动卡 → 骰子落盘</div>
+  </div>
+
+  <!-- 手牌 -->
+  <div class="hand" id="hand"></div>
+
+  <div class="dim" id="dim"></div>
+  <div class="res-card" id="resCard">
+    <div class="v" id="rV"></div>
+    <div class="eq" id="rEq"></div>
+    <div class="tx" id="rT"></div>
+    <div class="ef" id="rE"></div>
+    <div class="go"><span class="stamp" onclick="closeCard()">收 起 这 张 ▸</span></div>
+  </div>
+
+  <div class="end" id="end">
+    <div class="t" id="endT"></div>
+    <div class="d" id="endD"></div>
+    <div style="display:flex;gap:12px;margin-top:8px">
+      <span class="stamp" onclick="restart()">再 走 一 遍</span>
+      <span class="stamp" style="border-color:#6b5230;color:#d9a441" onclick="location.href='style-index.html'">换 个 样 式</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="engine.js"></script>
+<script>
+const Q = (s) => document.querySelector(s);
+const S = GAME.newState();
+let busy = false, typing = null;
+
+function fit(){ const s = Math.min(innerWidth / 1620, (innerHeight - 46) / 960); Q('#screen').style.transform='scale('+s+')'; }
+addEventListener('resize',fit); fit();
+
+function dieSVG(n, state){
+  const g = state==='crit' ? ['#fffbe8','#f2d071','#b8860b'] : state==='no' ? ['#e8a0a8','#a3232b','#5e1016'] : ['#fdf3d8','#e2cd9c','#a98c56'];
+  const ink = state==='no' ? '#fff2f3' : '#2b2013';
+  const u = 'g'+Math.random().toString(36).slice(2,7);
+  return `<svg viewBox="0 0 200 200" style="width:100%;height:100%">
+    <defs><linearGradient id="${u}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${g[0]}"/><stop offset=".46" stop-color="${g[1]}"/><stop offset="1" stop-color="${g[2]}"/></linearGradient></defs>
+    <polygon points="100,6 170,46 170,154 100,194 30,154 30,46" fill="url(#${u})" stroke="#6b5230" stroke-width="3"/>
+    <polygon points="100,6 170,46 100,100" fill="rgba(255,255,255,.34)"/>
+    <polygon points="170,46 170,154 100,100" fill="rgba(0,0,0,.07)"/>
+    <polygon points="170,154 100,194 100,100" fill="rgba(0,0,0,.15)"/>
+    <polygon points="100,194 30,154 100,100" fill="rgba(0,0,0,.22)"/>
+    <polygon points="30,154 30,46 100,100" fill="rgba(0,0,0,.1)"/>
+    <polygon points="30,46 100,6 100,100" fill="rgba(255,255,255,.18)"/>
+    <text x="100" y="122" text-anchor="middle" font-family="ui-monospace,monospace"
+      font-size="${String(n).length>1?74:86}" font-weight="900" fill="${ink}">${n}</text></svg>`;
+}
+function pips(el,n,max){ el.innerHTML = Array.from({length:max},(_,i)=>`<i class="${i<n?'on':''}"></i>`).join(''); }
+
+function render(){
+  pips(Q('#pHp'),S.hp,S.hpMax); pips(Q('#pGreed'),S.greed,S.greedMax);
+  Q('#nChip').textContent = S.chip;
+  Q('#attrs').innerHTML = Object.entries(S.attrs).map(([k,v])=>`
+    <div class="at"><span class="n">${k}<small>${GAME.ATTR_HINT[k]}</small></span><span class="v">${v}</span></div>`).join('');
+  Q('#items').innerHTML = Object.entries(GAME.ITEMS).map(([k,d])=>{
+    const n = S.items[k]||0;
+    return `<div class="tk${n?'':' off'}" title="${d.name} · ${d.desc}"><img src="${d.img}"/><span class="n">${n}</span></div>`;
+  }).join('');
+  if (S.obs){
+    Q('#obs').classList.add('on');
+    Q('#obsBar').style.width = Math.max(0,S.obs.cur/S.obs.max*100)+'%';
+    Q('#obsNum').textContent = Math.max(0,S.obs.cur)+' / '+S.obs.max;
+  } else Q('#obs').classList.remove('on');
+}
+function typeInto(el,text,done){
+  clearInterval(typing); let i=0;
+  el.innerHTML = '<span class="cursor"></span>';
+  typing = setInterval(()=>{
+    i+=2; if(i%6===0) GAME.sfx('tick');
+    el.innerHTML = text.slice(0,i).replace(/\n/g,'<br>')+'<span class="cursor"></span>';
+    if(i>=text.length){ clearInterval(typing); el.innerHTML = text.replace(/\n/g,'<br>'); done&&done(); }
+  },16);
+}
+function playBeat(){
+  const b = GAME.BEATS[S.beat];
+  busy = true;
+  Q('#who').textContent = b.who;
+  Q('#pic').style.backgroundImage = `url('${b.art}')`;
+  Q('#picCap').textContent = (b.who.split('·')[1]||'无 名').trim().split('').join(' ');
+  S.obs = b.obs ? {cur:b.obs.cur,max:b.obs.max} : null;
+  Q('#hand').innerHTML = '';
+  Q('#aside').textContent = '';
+  render();
+  typeInto(Q('#say'), b.text, ()=>{
+    Q('#aside').textContent = b.aside||'';
+    dealCards(b.acts);
+    busy = false;
+  });
+}
+function dealCards(acts){
+  const rots = [-2.4, 1.6, -1.2, 2.6];
+  Q('#hand').innerHTML = acts.map((a,i)=>`
+    <div class="card" style="--rot:${rots[i%4]}deg" onclick="pick(${i})">
+      <div class="t">${a.t}</div>
+      <div class="d">${a.d}</div>
+      <div class="dc"><span>${a.attr}</span><span>难度 ${a.dc}</span></div>
+    </div>`).join('');
+  Q('#trayNote').textContent = '选一张 → 骰子落盘';
+}
+function pick(i){
+  if(busy) return; busy = true;
+  GAME.sfx('click');
+  const act = GAME.BEATS[S.beat].acts[i];
+  const res = GAME.roll(S, act);
+  Q('#hand').innerHTML = '';
+  Q('#trayNote').textContent = `${act.attr} +${S.attrs[act.attr]}  vs  难度 ${act.dc}`;
+  const die = Q('#die'); die.className = 'die shake';
+  let n=0;
+  const spin = setInterval(()=>{
+    const f = 1+Math.floor(Math.random()*20);
+    die.innerHTML = dieSVG(f,'roll'); GAME.sfx('tick');
+    if(++n>12){ clearInterval(spin); settle(); }
+  },62);
+  function settle(){
+    const o = GAME.outcome(S,act,res);
+    GAME.apply(S,o.eff);
+    die.className = 'die';
+    die.innerHTML = dieSVG(res.r, res.crit?'crit':res.pass?'ok':'no');
+    Q('#dim').classList.add('on');
+    const card = Q('#resCard');
+    card.className = 'res-card on';
+    const v = Q('#rV');
+    v.textContent = o.verdict;
+    v.className = 'v ' + (res.crit?'crit':res.pass?'ok':'no');
+    Q('#rEq').textContent = `${res.attr} ${res.r} + ${res.mod} = ${res.total}   vs   难度 ${res.dc}`;
+    Q('#rT').textContent = o.text;
+    const et = GAME.effText(o.eff);
+    Q('#rE').textContent = et ? '· '+et : '';
+    render();
+    if(res.crit) GAME.sfx('crit'); else if(res.pass) GAME.sfx('ok'); else GAME.sfx('no');
+  }
+}
+function closeCard(){
+  GAME.sfx('click');
+  Q('#resCard').className = 'res-card';
+  Q('#dim').classList.remove('on');
+  busy = false;
+  Q('#trayNote').textContent = '点下面的行动卡 → 骰子落盘';
+  const e = GAME.ending(S);
+  if(e) return showEnd(e);
+  const b = GAME.BEATS[S.beat];
+  if(b.obs && S.obs && S.obs.cur>0) return playBeat();
+  S.beat++;
+  if(S.beat>=GAME.BEATS.length) return showEnd(GAME.ending(S));
+  playBeat();
+}
+function showEnd(e){
+  Q('#endT').textContent = e.t;
+  Q('#endT').style.color = e.tone==='bad'?'#ff8f8f':e.tone==='good'?'#7ff0c0':'#f0d878';
+  Q('#endD').textContent = e.d;
+  Q('#end').classList.add('on');
+}
+function restart(){
+  Object.assign(S, GAME.newState());
+  Q('#end').classList.remove('on');
+  playBeat();
+}
+addEventListener('keydown',(e)=>{
+  if(Q('#resCard').classList.contains('on')){ if(e.key===' '||e.key==='Enter'){e.preventDefault();closeCard();} return; }
+  if(/^[1-9]$/.test(e.key)){ const el=Q('#hand').children[+e.key-1]; if(el) el.click(); }
+});
+Q('#die').innerHTML = dieSVG('?','roll');
+render(); playBeat();
+</script>
+<script src="nav.js"></script>
+</body>
+</html>

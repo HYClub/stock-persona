@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>样式三 · 终端</title>
+<link rel="stylesheet" href="nav.css" />
+<style>
+  :root{
+    --amb:#ffb547; --amb2:#ffd98a; --ambD:#8a5c14;
+    --grn:#5ef08a; --red:#ff6a5e;
+    --tx:#e8d9b8; --dim:#a08a5c; --faint:#5f5030;
+    --mono:"Cascadia Mono",ui-monospace,"SF Mono",Consolas,"Courier New",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#020202;color:var(--tx);font-family:var(--mono)}
+  #stage{position:fixed;inset:46px 0 0 0;display:grid;place-items:center}
+  .screen{position:relative;width:1600px;height:940px;overflow:hidden;border-radius:14px;
+    background:radial-gradient(120% 100% at 50% 50%,#0d0a05,#050402 70%);
+    border:2px solid #2a2114;box-shadow:0 30px 90px rgba(0,0,0,.95),inset 0 0 120px rgba(0,0,0,.9);
+    transform-origin:center;color:var(--amb)}
+  /* 扫描线 + 闪烁 + 暗角 —— 让它像一台真的 CRT */
+  .scan{position:absolute;inset:0;pointer-events:none;z-index:9;
+    background:repeating-linear-gradient(180deg,rgba(0,0,0,.34) 0 1px,transparent 1px 3px);
+    mix-blend-mode:multiply}
+  .glow{position:absolute;inset:0;pointer-events:none;z-index:10;
+    background:radial-gradient(78% 68% at 50% 50%,transparent 44%,rgba(0,0,0,.85) 100%)}
+  .flick{position:absolute;inset:0;pointer-events:none;z-index:11;background:rgba(255,181,71,.03);
+    animation:fl 4.5s steps(1) infinite}
+  @keyframes fl{0%,97%{opacity:0}98%{opacity:.5}99%{opacity:.15}100%{opacity:0}}
+
+  .wrap{position:absolute;inset:0;z-index:3;padding:26px 34px;display:flex;flex-direction:column;gap:16px}
+
+  .bar{display:flex;align-items:center;gap:14px;font-size:13px;letter-spacing:.08em;
+    border-bottom:1px solid var(--ambD);padding-bottom:10px}
+  .bar .id{color:var(--amb2)}
+  .sp{flex:1}
+  .bar .st{color:var(--dim);font-size:12px}
+  .bar .st b{color:var(--amb2);font-weight:400}
+  .pips{letter-spacing:2px;color:var(--faint)}
+  .pips .on{color:var(--amb2);text-shadow:0 0 8px rgba(255,181,71,.8)}
+  .pips.h .on{color:#ffd98a}
+  .pips.g .on{color:var(--red);text-shadow:0 0 8px rgba(255,106,94,.8)}
+
+  .main{flex:1;display:flex;gap:20px;min-height:0}
+  .left{flex:0 0 320px;display:flex;flex-direction:column;gap:14px;min-height:0}
+  .right{flex:0 0 300px;display:flex;flex-direction:column;gap:14px;min-height:0}
+  .mid{flex:1;display:flex;flex-direction:column;gap:14px;min-width:0;min-height:0}
+
+  .pn{border:1px solid var(--ambD);background:rgba(255,181,71,.025);padding:12px 14px}
+  .pn h4{font-size:11.5px;font-weight:400;letter-spacing:.22em;color:var(--ambD);margin-bottom:10px}
+  .pn h4 span{color:var(--amb2)}
+
+  .row{display:flex;align-items:center;gap:8px;font-size:13px;padding:3px 0}
+  .row .n{flex:1;color:var(--dim)}
+  .row .v{color:var(--amb2)}
+  .bar2{width:70px;color:var(--ambD);letter-spacing:-1px}
+
+  .items{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .it{display:flex;align-items:center;gap:8px;font-size:12px;padding:5px 7px;border:1px solid var(--ambD);
+    color:var(--dim);cursor:default}
+  .it img{width:22px;height:22px;mix-blend-mode:screen;filter:brightness(1.5) sepia(.5) saturate(2)}
+  .it .nm{flex:1}
+  .it .ct{color:var(--amb2)}
+  .it.off{opacity:.3}
+
+  /* 主屏：滚动日志 */
+  .screenlog{flex:1;min-height:0;border:1px solid var(--ambD);padding:16px 18px;overflow:hidden;
+    background:rgba(255,181,71,.02);position:relative}
+  .logline{font-size:15px;line-height:1.95;color:var(--amb2);white-space:pre-wrap;margin-bottom:4px}
+  .logline.dim{color:var(--dim);font-size:13.5px}
+  .logline.big{font-size:19px;color:#fff0cf;text-shadow:0 0 12px rgba(255,181,71,.5)}
+  .cur{display:inline-block;width:9px;height:16px;background:var(--amb2);vertical-align:-3px;animation:bl .85s steps(1) infinite}
+  @keyframes bl{50%{opacity:0}}
+  .prompt{color:var(--ambD)}
+
+  /* 选项：命令行 */
+  .acts{flex:0 0 auto;border:1px solid var(--ambD);padding:12px 16px;background:rgba(255,181,71,.03)}
+  .acts .h{font-size:11.5px;letter-spacing:.22em;color:var(--ambD);margin-bottom:9px}
+  .act{display:flex;align-items:baseline;gap:12px;padding:7px 8px;cursor:pointer;font-size:14px;
+    line-height:1.7;border:1px solid transparent}
+  .act:hover{background:rgba(255,181,71,.09);border-color:var(--ambD)}
+  .act .k{color:var(--amb2);width:34px;flex:none}
+  .act .t{flex:1;color:var(--tx)}
+  .act .d{display:block;font-size:12px;color:var(--dim);margin-top:2px}
+  .act .dc{color:var(--amb);font-size:12.5px;white-space:nowrap;flex:none}
+
+  .obswrap{font-size:12.5px;color:var(--dim)}
+  .obsbar{margin-top:6px;color:var(--red);letter-spacing:1px}
+
+  .rollbox{border:1px solid var(--ambD);padding:14px;font-size:13px;color:var(--dim);line-height:1.8}
+  .rollbox .big{font-size:52px;line-height:1.1;color:var(--amb2);text-shadow:0 0 24px rgba(255,181,71,.6)}
+  .rollbox .vd{font-size:16px;letter-spacing:.2em;margin-top:6px}
+  .rollbox .vd.ok{color:var(--grn)} .rollbox .vd.no{color:var(--red)} .rollbox .vd.crit{color:#fff0cf}
+  .spin{animation:bl .1s steps(1) infinite}
+
+  .end{position:absolute;inset:0;z-index:20;display:none;flex-direction:column;align-items:center;justify-content:center;
+    gap:18px;background:rgba(3,2,1,.94);padding:0 120px;text-align:center}
+  .end.on{display:flex}
+  .end .t{font-size:34px;letter-spacing:.3em;color:var(--amb2);text-shadow:0 0 30px rgba(255,181,71,.6)}
+  .end .d{font-size:15px;line-height:2.1;color:var(--dim);white-space:pre-line}
+  .end .b{margin-top:10px;font-size:14px;color:var(--amb);cursor:pointer;border:1px solid var(--ambD);padding:10px 24px}
+  .end .b:hover{background:rgba(255,181,71,.12)}
+</style>
+</head>
+<body>
+<div id="stage">
+<div class="screen" id="screen">
+  <div class="wrap">
+    <div class="bar">
+      <span class="id">■ 股神异闻录</span>
+      <span class="st">/ 第一章 · 第七层 / 三号厅</span>
+      <span class="sp"></span>
+      <span class="st">心态 <span class="pips h" id="pHp"></span></span>
+      <span class="st">贪婪 <span class="pips g" id="pGreed"></span></span>
+      <span class="st">筹码 <b id="nChip">3</b></span>
+    </div>
+
+    <div class="main">
+      <div class="left">
+        <div class="pn">
+          <h4>SUBJECT / <span>无名散户</span></h4>
+          <div id="attrs"></div>
+        </div>
+        <div class="pn" style="flex:1;min-height:0;overflow:hidden">
+          <h4>INVENTORY</h4>
+          <div class="items" id="items"></div>
+        </div>
+      </div>
+
+      <div class="mid">
+        <div class="screenlog" id="log"></div>
+        <div class="acts">
+          <div class="h" id="actsH">▸ 输 入 指 令</div>
+          <div id="actList"></div>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="pn" id="obsPanel" style="display:none">
+          <h4>OBSESSION / <span id="obsName">对倒幽灵</span></h4>
+          <div class="obswrap">
+            <span id="obsNum">5 / 8</span>
+            <div class="obsbar" id="obsBar"></div>
+          </div>
+        </div>
+        <div class="pn" style="flex:1;min-height:0;overflow:hidden">
+          <h4>ROLL LOG</h4>
+          <div id="rollLog" style="font-size:12px;line-height:1.9;color:var(--dim)">— 无记录 —</div>
+        </div>
+        <div id="rollBox" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scan"></div><div class="glow"></div><div class="flick"></div>
+
+  <div class="end" id="end">
+    <div class="t" id="endT"></div>
+    <div class="d" id="endD"></div>
+    <div style="display:flex;gap:14px">
+      <span class="b" onclick="restart()">再 走 一 遍</span>
+      <span class="b" onclick="location.href='style-index.html'">换 个 样 式</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="engine.js"></script>
+<script>
+const Q = (s) => document.querySelector(s);
+const S = GAME.newState();
+let busy = false, typing = null, started = false;
+
+function fit(){ const s = Math.min(innerWidth / 1620, (innerHeight - 46) / 960); Q('#screen').style.transform='scale('+s+')'; }
+addEventListener('resize',fit); fit();
+
+function pips(n,max){
+  return Array.from({length:max},(_,i)=>`<span class="${i<n?'on':''}">■</span>`).join('');
+}
+function render(){
+  Q('#pHp').innerHTML = pips(S.hp,S.hpMax);
+  Q('#pGreed').innerHTML = pips(S.greed,S.greedMax);
+  Q('#nChip').textContent = S.chip;
+  Q('#attrs').innerHTML = Object.entries(S.attrs).map(([k,v])=>
+    `<div class="row"><span class="n">${k}</span><span class="bar2">${'▮'.repeat(v)}${'▯'.repeat(5-v)}</span><span class="v">${v}</span></div>`).join('');
+  Q('#items').innerHTML = Object.entries(GAME.ITEMS).map(([k,d])=>{
+    const n = S.items[k]||0;
+    return `<div class="it${n?'':' off'}"><img src="${d.img}"/><span class="nm">${d.name}</span><span class="ct">${n}</span></div>`;
+  }).join('');
+  if (S.obs){
+    Q('#obsPanel').style.display = 'block';
+    Q('#obsNum').textContent = Math.max(0,S.obs.cur)+' / '+S.obs.max;
+    Q('#obsBar').textContent = '█'.repeat(Math.max(0,S.obs.cur)) + '░'.repeat(Math.max(0,S.obs.max-S.obs.cur));
+  } else Q('#obsPanel').style.display = 'none';
+}
+
+/* 终端是一行一行"打"出来的 */
+let logHTML = '';
+function clearLog(){ logHTML=''; Q('#log').innerHTML=''; }
+function pushLine(html, cls){
+  logHTML += `<div class="logline ${cls||''}">${html}</div>`;
+  Q('#log').innerHTML = logHTML;
+}
+function typeLine(text, cls, done){
+  const id = 'L'+Math.random().toString(36).slice(2,8);
+  logHTML += `<div class="logline ${cls||''}" id="${id}"></div>`;
+  Q('#log').innerHTML = logHTML;
+  const el = document.getElementById(id);
+  clearInterval(typing);
+  let i=0;
+  typing = setInterval(()=>{
+    i+=2; if(i%5===0) GAME.sfx('tick');
+    el.textContent = text.slice(0,i);
+    if(i>=text.length){ clearInterval(typing); el.textContent = text; done&&done(); }
+  },15);
+}
+
+function playBeat(){
+  const b = GAME.BEATS[S.beat];
+  busy = true;
+  S.obs = b.obs ? {cur:b.obs.cur,max:b.obs.max} : null;
+  render(); clearLog();
+  Q('#actList').innerHTML = '';
+  Q('#actsH').textContent = '▸ …';
+  pushLine('<span class="prompt">&gt;</span> LOAD 第七层/三号厅 ................ <span style="color:var(--grn)">OK</span>','dim');
+  pushLine('<span class="prompt">&gt;</span> SOURCE ' + b.who.replace(/ /g,'') + ' ................ <span style="color:var(--grn)">OK</span>','dim');
+  setTimeout(()=>{
+    b.text.split('\n').forEach((line)=>{
+      pushLine(line, line.indexOf('第七层')>=0 ? 'big' : '');
+    });
+    if(b.aside) pushLine(b.aside,'dim');
+    pushLine('<span class="prompt">&gt;</span> <span class="cur"></span>','');
+    deal(b.acts);
+    busy = false;
+  },260);
+}
+function deal(acts){
+  Q('#actsH').innerHTML = '▸ 输 入 指 令 &nbsp;<span style="color:var(--faint)">（点一行，或按数字键）</span>';
+  Q('#actList').innerHTML = acts.map((a,i)=>`
+    <div class="act" onclick="pick(${i})">
+      <span class="k">[${i+1}]</span>
+      <span class="t">${a.t}<span class="d">${a.d}</span></span>
+      <span class="dc">${a.attr} ${a.dc}</span>
+    </div>`).join('');
+}
+function pick(i){
+  if(busy) return; busy = true;
+  GAME.sfx('click');
+  const act = GAME.BEATS[S.beat].acts[i];
+  const res = GAME.roll(S, act);
+  Q('#actList').innerHTML = '';
+  Q('#actsH').textContent = '▸ 检 定 中 …';
+  pushLine(`<span class="prompt">&gt;</span> CHECK ${act.attr} DC=${act.dc} ...`);
+
+  const box = Q('#rollBox');
+  box.style.display = 'block';
+  let n=0;
+  const spin = setInterval(()=>{
+    const f = 1+Math.floor(Math.random()*20);
+    box.innerHTML = `<div class="rollbox"><div class="big spin">${f}</div>
+      <div>d20 滚动中…</div></div>`;
+    GAME.sfx('tick');
+    if(++n>13){ clearInterval(spin); settle(); }
+  },60);
+
+  function settle(){
+    const o = GAME.outcome(S,act,res);
+    GAME.apply(S,o.eff);
+    const cls = res.crit?'crit':res.pass?'ok':'no';
+    box.innerHTML = `<div class="rollbox">
+      <div class="big">${res.r}</div>
+      <div>d20 ${res.r} + ${res.attr} ${res.mod} = <span style="color:var(--amb2)">${res.total}</span> vs DC ${res.dc}</div>
+      <div class="vd ${cls}">${o.verdict}</div>
+      <div style="margin-top:10px;color:var(--tx);font-size:14px;line-height:1.85">${o.text.replace(/\n/g,'<br>')}</div>
+      <div style="margin-top:10px;color:var(--amb)">${GAME.effText(o.eff)||''}</div>
+      <div style="margin-top:12px"><span style="cursor:pointer;color:var(--amb2);border:1px solid var(--ambD);padding:7px 18px"
+        onclick="closeIt()">继 续 ▸</span></div></div>`;
+    pushLine(`　→ ${o.verdict} ${res.r}+${res.mod}=${res.total}`, res.pass?'':'dim');
+    S.log.unshift(`${act.attr} ${res.r}+${res.mod}=${res.total} vs ${res.dc} · ${o.verdict}`);
+    Q('#rollLog').innerHTML = S.log.slice(0,10).map(l=>'· '+l).join('<br>') || '— 无记录 —';
+    render();
+    if(res.crit) GAME.sfx('crit'); else if(res.pass) GAME.sfx('ok'); else GAME.sfx('no');
+  }
+}
+function closeIt(){
+  GAME.sfx('click');
+  Q('#rollBox').style.display='none';
+  busy = false;
+  const e = GAME.ending(S);
+  if(e) return showEnd(e);
+  const b = GAME.BEATS[S.beat];
+  if(b.obs && S.obs && S.obs.cur>0) return playBeat();
+  S.beat++;
+  if(S.beat>=GAME.BEATS.length) return showEnd(GAME.ending(S));
+  playBeat();
+}
+function showEnd(e){
+  Q('#endT').textContent = e.t;
+  Q('#endT').style.color = e.tone==='bad'?'var(--red)':e.tone==='good'?'var(--grn)':'var(--amb2)';
+  Q('#endD').textContent = e.d;
+  Q('#end').classList.add('on');
+}
+function restart(){ Object.assign(S,GAME.newState()); Q('#end').classList.remove('on'); Q('#rollLog').innerHTML='— 无记录 —'; playBeat(); }
+
+addEventListener('keydown',(e)=>{
+  if(Q('#rollBox').style.display==='block'){ if(e.key===' '||e.key==='Enter'){e.preventDefault();closeIt();} return; }
+  if(/^[1-9]$/.test(e.key)){ const el=Q('#actList').children[+e.key-1]; if(el) el.click(); }
+});
+
+render(); playBeat();
+</script>
+<script src="nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>股神异闻录 · 七种玩法样式</title>
+<link rel="stylesheet" href="nav.css" />
+<style>
+  :root{
+    --gold:#d9a441; --gold2:#f0d878; --goldD:#7a5f1c;
+    --tx:#efe6d6; --dim:#a8967c; --faint:#6b5b46;
+    --serif:"Songti SC","STSong","SimSun",Georgia,serif;
+    --sans:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    --mono:ui-monospace,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#060403;color:var(--tx);font-family:var(--sans);overflow-x:hidden;padding-top:64px;
+    padding:44px 26px 70px;-webkit-font-smoothing:antialiased}
+  .doc{max-width:1520px;margin:0 auto}
+  h1{font-family:var(--serif);font-size:30px;font-weight:400;letter-spacing:.18em;color:var(--gold2)}
+  h1 small{display:block;font-family:var(--sans);font-size:12.5px;letter-spacing:.14em;color:var(--dim);margin-top:10px;line-height:2}
+  .lead{font-size:14px;color:#bcb19c;line-height:2.1;max-width:1000px;margin-top:16px}
+  .lead b{color:var(--gold2);font-weight:400}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:20px;margin-top:34px}
+  .card{border:1px solid #3a2c1c;border-radius:8px;overflow:hidden;background:#110c08;text-decoration:none;
+    color:inherit;display:flex;flex-direction:column;transition:.16s}
+  .card:hover{transform:translateY(-5px);border-color:var(--gold);box-shadow:0 0 40px rgba(217,164,65,.25),0 18px 40px rgba(0,0,0,.7)}
+  .card .shot{height:284px;background-size:cover;background-position:center;position:relative;border-bottom:1px solid #3a2c1c}
+  .card .shot::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(10,6,5,.7))}
+  .card .n{position:absolute;top:12px;left:12px;z-index:2;width:30px;height:30px;border-radius:50%;
+    display:grid;place-items:center;font-family:var(--mono);font-size:14px;color:#3a2405;
+    background:radial-gradient(circle at 34% 28%,#fdeeb9,#d8ab44 55%,#8a6520)}
+  .card .b{padding:18px 20px 20px;display:flex;flex-direction:column;gap:9px;flex:1}
+  .card h3{font-family:var(--serif);font-size:20px;font-weight:400;letter-spacing:.1em;color:var(--gold2)}
+  .card .tg{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--faint)}
+  .card p{font-size:12.5px;line-height:1.9;color:#b3a894;flex:1}
+  .card .go{margin-top:6px;padding-top:12px;border-top:1px solid #2c2114;font-size:12.5px;
+    letter-spacing:.18em;color:var(--gold);display:flex;justify-content:space-between;align-items:center}
+  .card .go em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.06em}
+
+  .foot{margin-top:38px;border:1px solid #3a2c1c;border-radius:8px;padding:20px 26px;background:#0f0b07}
+  .foot h2{font-family:var(--serif);font-size:17px;font-weight:400;letter-spacing:.14em;color:var(--gold);margin-bottom:12px}
+  .foot p{font-size:13px;line-height:2.05;color:#b3a894}
+  .foot b{color:var(--gold2);font-weight:400}
+  .tag{display:inline-block;font-size:11px;font-family:var(--mono);border:1px solid #3a2c1c;border-radius:3px;
+    padding:2px 8px;color:var(--dim);margin:3px 5px 3px 0}
+</style>
+</head>
+<body>
+<div class="doc">
+  <h1>股神异闻录 · 七种玩法样式<small>前五种内容一模一样，变的只有「怎么呈现、怎么操作」；后两种连玩法都不一样 —— 都点进去试一遍</small></h1>
+
+  <p class="lead" style="margin-top:6px;font-size:12.5px;color:#8d7f63">
+    下面的缩略图都是<b style="color:var(--gold)">各自界面本身</b>的截图 —— 每种的 UI 差别一眼能看出来。
+  </p>
+
+  <p class="lead">
+    前五种是<b>同一场遭遇</b>：第七层、那张纸、对倒幽灵。规则一样，成败真的改心态 / 贪婪 / 执念 ——
+    唯一不同的是它们<b>长得完全不一样</b>，你点起来的动作也不一样。<br>
+    第六种连玩法都换了：加了一套<b>弱点 → 加码 → 一致行动</b>的回合经济，以及五种「操盘人格」。<br>
+    第七种再把 Persona 的<b>骨架</b>也搬过来：日历、社群、楼层、谈判、面具融合。<br>
+    键盘 <b>1-9</b> 选行动，<b>空格</b>继续。
+  </p>
+
+  <div class="grid">
+    <a class="card" href="style-1-novel.html">
+      <div class="shot" style="background-image:url('img/shot-1.jpg')"><span class="n">1</span></div>
+      <div class="b">
+        <h3>立 绘 对 话</h3>
+        <div class="tg">VISUAL NOVEL</div>
+        <p>全屏背景 + 大立绘，底下一条对话框，选项浮在框上方。最主流、最省心的做法 ——
+          玩家一秒钟就知道该点哪儿，戏剧感靠立绘和打字机撑。</p>
+        <div class="go"><span>进 去 试 ▸</span><em>适合：剧情密度高</em></div>
+      </div>
+    </a>
+
+    <a class="card" href="style-2-table.html">
+      <div class="shot" style="background-image:url('img/shot-2.jpg')"><span class="n">2</span></div>
+      <div class="b">
+        <h3>桌 面 俯 视</h3>
+        <div class="tg">TABLETOP</div>
+        <p>一块木桌从上往下看：角色卡、道具筹码、异闻的拍立得、旁白写在索引卡上，
+          行动是摊在桌沿的卡。骰子落在绿绒骰盘里 —— 最像"真的在跑团"。</p>
+        <div class="go"><span>进 去 试 ▸</span><em>适合：要"实物感"</em></div>
+      </div>
+    </a>
+
+    <a class="card" href="style-3-terminal.html">
+      <div class="shot" style="background-image:url('img/shot-3.jpg')"><span class="n">3</span></div>
+      <div class="b">
+        <h3>终 端</h3>
+        <div class="tg">CRT TERMINAL</div>
+        <p>黑色屏幕、琥珀色等宽字、扫描线和微弱闪烁。旁白一行一行"打"出来，
+          选项是命令行编号，判定写成 <code>CHECK 洞察 DC=13</code>。最冷、最贴题材。</p>
+        <div class="go"><span>进 去 试 ▸</span><em>适合：要氛围压倒一切</em></div>
+      </div>
+    </a>
+
+    <a class="card" href="style-4-cards.html">
+      <div class="shot" style="background-image:url('img/shot-4.jpg')"><span class="n">4</span></div>
+      <div class="b">
+        <h3>手 牌</h3>
+        <div class="tg">CARD HAND</div>
+        <p>异闻顶在上半屏像一张大牌，你的行动是手里扇开的一把牌 —— 悬停会抬起来，
+          打出去会飞到中间，骰子再落到它上面。最"现代肉鸽"的一种。</p>
+        <div class="go"><span>进 去 试 ▸</span><em>适合：要打击感</em></div>
+      </div>
+    </a>
+
+    <a class="card" href="style-5-dossier.html">
+      <div class="shot" style="background-image:url('img/shot-5.jpg')"><span class="n">5</span></div>
+      <div class="b">
+        <h3>卷 宗</h3>
+        <div class="tg">DOSSIER</div>
+        <p>一份摊开的牛皮纸档案：左页贴着异闻的照片和事实，右页是笔录和"盖章式"选项，
+          判定结果是一枚盖上去的戳。最像"调查员"的一种。</p>
+        <div class="go"><span>进 去 试 ▸</span><em>适合：要"查案"感</em></div>
+      </div>
+    </a>
+
+    <a class="card" href="style-6-persona.html">
+      <div class="shot" style="background-image:url('img/shot-6.jpg')"><span class="n">6</span></div>
+      <div class="b">
+        <h3>心 之 怪 盗</h3>
+        <div class="tg">PERSONA · 弱点 / 加码 / 一致行动</div>
+        <p>黑红斜切、撕纸框、倾斜的指令条。<b>但真正搬过来的是回合经济</b>：每个异闻有一个「死穴」，
+          打中就是 WEAK!! 加码再动一次；打空执念触发「一致行动」。
+          死穴不是随机数 —— 是<b>从那一段真实行情的赚钱方式里推出来的</b>。</p>
+        <div class="go"><span>进 去 试 ▸</span><em>适合：要打击感 + 有推理</em></div>
+      </div>
+    </a>
+
+    <a class="card" href="style-7-seven-days.html">
+      <div class="shot" style="background-image:url('img/shot-7.jpg')"><span class="n">7</span></div>
+      <div class="b">
+        <h3>七 日</h3>
+        <div class="tg">PERSONA · 完整循环</div>
+        <p>把 Persona 的<b>骨架整套</b>搬过来 —— 日历、社群、社会属性、楼层、谈判收服、面具融合。
+          每个系统都只有一层皮，但都在。七天十四个时段，每天只能做一件事：
+          见一个人、上一层楼、看档案、或者休息。<b>第七天收盘前没打倒首领，它就长到下一层。</b></p>
+        <div class="go"><span>进 去 试 ▸</span><em>适合：要"经营感"</em></div>
+      </div>
+    </a>
+  </div>
+
+  <div class="foot">
+    <h2>七 种 的 差 别 到 底 在 哪</h2>
+    <p>
+      <b>1 立绘对话</b> —— 视线固定在屏幕下方三分之一，选项永远同一个位置。学习成本最低，
+      但玩久了会觉得"只是在一张图上点按钮"。<br>
+      <b>2 桌面俯视</b> —— 信息分散在整块桌面上，眼睛要移动。换来的是极强的"实物感"，
+      而且骰盘这个物件本身就成了情绪高点。<br>
+      <b>3 终端</b> —— 信息是一条时间线，从上往下滚。最克制，也最能把"你在跟一个系统对话"这件事讲清楚；
+      代价是异闻立绘用不上，视觉全靠字。<br>
+      <b>4 手牌</b> —— 操作在屏幕底部，反馈在屏幕中央，中间有"打出去"的位移。
+      打击感最强，但卡牌这个形式会让人以为是个构筑游戏。<br>
+      <b>5 卷宗</b> —— 信息是"一页一页翻"的，天然适合调查和多线索；
+      但遭遇战的节奏会被纸感拖慢。<br>
+      <b>6 心之怪盗</b> —— 前五种都是"选一个行动、掷一次骰"；这一种多了一层<b>推理</b>：
+      你不知道它的死穴是什么，只能一个一个试，试过会留记号。打中弱点把它打<b>倒地</b>：
+      白得一手（1 MORE），它下回合还动不了；倒地期间可以喊<b>一致行动</b>。
+      代价是它比其它五种都"重"，一局要打十几个回合。<br>
+      <b>7 七日</b> —— 前六种都是"打一场"；这一种是"过七天"。真正的主角是<b>日历</b>：
+      十四个时段，见一个人就少一次上楼的机会。它不追求手感，追求的是"来不及了"的那种紧。
+    </p>
+    <p style="margin-top:14px">
+      我的看法：<b>主线用 1（立绘对话）</b>，因为它最稳、最不会劝退；
+      <b>调查类节点换成 5（卷宗）</b>，因为查资料这件事本来就该是一页纸；
+      <b>章节首领战用 2（桌面）</b>，把骰盘和实物感留给最重要的那几场。
+      3 和 4 是很强的风格，但会把整个游戏绑死在一种调性上，更适合做特殊关卡或者彩蛋。
+    </p>
+    <p style="margin-top:14px">
+      <span class="tag">共用 engine.js</span><span class="tag">同一段剧本 / 同一套规则</span>
+      <span class="tag">骰子是 SVG，能显示 1~20</span>
+    </p>
+  </div>
+</div>
+<script src="nav.js"></script>
+</body>
+</html>

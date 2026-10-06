@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>样式五 · 卷宗</title>
+<link rel="stylesheet" href="nav.css" />
+<style>
+  :root{
+    --ink:#1f1a12; --ink2:#4a4030; --inkL:#7a6e56;
+    --paper:#efe6cf; --paper2:#e2d6b8; --manila:#c9a961;
+    --red:#8c1a20; --grn:#1d6b4a; --gold:#d9a441;
+    --serif:"Songti SC","STSong","SimSun",Georgia,serif;
+    --sans:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    --mono:"Courier New",ui-monospace,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#050303;font-family:var(--sans)}
+  #stage{position:fixed;inset:46px 0 0 0;display:grid;place-items:center}
+  .screen{position:relative;width:1600px;height:940px;overflow:hidden;border-radius:10px;
+    border:1px solid #3a2c1c;box-shadow:0 30px 80px rgba(0,0,0,.95);transform-origin:center;
+    background:url('img/wood-dark.jpg');background-size:420px}
+
+  .lamp{position:absolute;inset:0;
+    background:radial-gradient(52% 48% at 50% 30%,rgba(255,206,130,.24),transparent 62%),
+               radial-gradient(90% 80% at 50% 50%,transparent 26%,rgba(0,0,0,.8) 100%)}
+
+  /* ═══ 卷宗 ═══ */
+  .folder{position:absolute;left:78px;right:78px;top:56px;bottom:52px;border-radius:6px;
+    background:linear-gradient(172deg,#d8b972,#bb9a4e 60%,#a5863c);
+    box-shadow:0 26px 60px rgba(0,0,0,.85),inset 0 2px 0 rgba(255,240,200,.3)}
+  .folder .tab{position:absolute;top:-30px;left:56px;width:260px;height:32px;border-radius:6px 6px 0 0;
+    background:linear-gradient(180deg,#e0c07c,#c9a961);border-bottom:1px solid rgba(0,0,0,.15);
+    display:flex;align-items:center;padding:0 20px;font-family:var(--mono);font-size:12px;
+    letter-spacing:.16em;color:#4a3a18}
+  .sheets{position:absolute;inset:20px;display:flex;gap:0;border-radius:4px;overflow:hidden;
+    box-shadow:0 6px 20px rgba(0,0,0,.5)}
+  .page{flex:1;position:relative;padding:34px 40px;color:var(--ink);overflow:hidden;
+    background:
+      radial-gradient(120% 90% at 20% 4%,rgba(255,255,250,.8),transparent 58%),
+      repeating-linear-gradient(180deg,transparent 0 35px,rgba(90,110,140,.13) 35px 36px),
+      linear-gradient(170deg,var(--paper),var(--paper2))}
+  .page.l{border-right:1px solid rgba(60,50,30,.35)}
+  .page.r{background:
+      radial-gradient(120% 90% at 20% 4%,rgba(255,255,250,.8),transparent 58%),
+      repeating-linear-gradient(180deg,transparent 0 35px,rgba(90,110,140,.13) 35px 36px),
+      linear-gradient(170deg,#f2e9d3,#e5dabf)}
+  .page::after{content:"";position:absolute;inset:0;pointer-events:none;
+    box-shadow:inset 0 0 70px rgba(120,95,45,.24)}
+
+  /* 左页：照片 + 事实 */
+  .photo{position:relative;width:330px;margin:0 auto;padding:10px 10px 42px;
+    background:linear-gradient(170deg,#fffdf6,#e6dcc4);border:1px solid #b6a582;
+    box-shadow:0 12px 26px rgba(0,0,0,.35);transform:rotate(-1.6deg)}
+  .photo .pic{width:100%;height:300px;background-size:cover;background-position:center;
+    box-shadow:inset 0 0 26px rgba(0,0,0,.6)}
+  .photo .cap{position:absolute;left:0;right:0;bottom:12px;text-align:center;
+    font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:#5a4a2c}
+  .clip{position:absolute;top:-16px;right:40px;width:22px;height:54px;border:3px solid #8e8e8e;
+    border-radius:11px;border-bottom-color:transparent;transform:rotate(7deg);opacity:.9}
+
+  .facts{margin-top:22px;font-family:var(--mono);font-size:12.5px;line-height:2.1;color:var(--ink2)}
+  .facts .k{color:#8a7a5a}
+  .facts .v{color:var(--red)}
+  .stampmark{position:absolute;right:34px;bottom:34px;transform:rotate(-14deg);
+    border:3px double rgba(140,26,32,.5);border-radius:4px;padding:8px 18px;
+    font-family:var(--mono);font-size:15px;letter-spacing:.24em;color:rgba(140,26,32,.55)}
+
+  /* 右页：旁白 */
+  .rhd{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid rgba(31,26,18,.35);
+    padding-bottom:12px;margin-bottom:20px}
+  .rhd .w{font-family:var(--serif);font-size:17px;letter-spacing:.12em;color:var(--red)}
+  .rhd .sp{flex:1}
+  .rhd small{font-family:var(--mono);font-size:11.5px;color:var(--inkL);letter-spacing:.08em}
+  .say{font-family:var(--serif);font-size:20px;line-height:2.05;color:var(--ink);min-height:150px}
+  .aside{margin-top:14px;font-size:13.5px;line-height:1.9;color:var(--ink2);
+    border-left:3px solid rgba(140,26,32,.35);padding-left:14px}
+  .cur{display:inline-block;width:9px;height:20px;background:var(--ink);vertical-align:-4px;animation:bl .9s steps(1) infinite}
+  @keyframes bl{50%{opacity:0}}
+
+  /* 右页：盖章式选项 */
+  .acts{margin-top:26px;display:flex;flex-direction:column;gap:12px;opacity:0;transition:.2s}
+  .acts.on{opacity:1}
+  .act{display:flex;align-items:center;gap:16px;padding:13px 18px;cursor:pointer;
+    border:1.5px solid rgba(31,26,18,.3);border-radius:3px;background:rgba(255,255,255,.35);
+    transition:.12s}
+  .act:hover{background:rgba(255,255,255,.7);border-color:var(--red);transform:translateX(5px)}
+  .act .no{font-family:var(--mono);font-size:13px;color:var(--inkL);width:20px}
+  .act .tx{flex:1}
+  .act .tx b{display:block;font-family:var(--serif);font-size:16.5px;font-weight:400;color:var(--ink)}
+  .act .tx span{display:block;font-size:12px;color:var(--inkL);margin-top:4px;line-height:1.65}
+  .act .dc{flex:none;font-family:var(--mono);font-size:12px;padding:5px 12px;border-radius:2px;
+    border:1.5px solid rgba(31,26,18,.4);color:var(--ink2);white-space:nowrap}
+  .act .dc.hard{border-color:var(--red);color:var(--red)}
+  .act .dc.easy{border-color:var(--grn);color:var(--grn)}
+
+  /* 顶部：状态条像贴在文件夹外面的便签 */
+  .notes{position:absolute;top:-14px;right:80px;display:flex;gap:12px;z-index:6}
+  .note{background:linear-gradient(180deg,#fff6cf,#f2e08e);padding:8px 16px;border-radius:2px;
+    box-shadow:0 6px 14px rgba(0,0,0,.5);font-family:var(--mono);font-size:12px;color:#4a3a18;
+    transform:rotate(1.4deg);display:flex;align-items:center;gap:8px}
+  .note:nth-child(2){transform:rotate(-1.8deg);background:linear-gradient(180deg,#ffe6cf,#f2c78e)}
+  .note b{color:#8c1a20;font-weight:700}
+  .dots{display:flex;gap:3px}
+  .dots i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(74,58,24,.5);background:rgba(0,0,0,.1)}
+  .dots.h i.on{background:#c9992f;border-color:#8a6520}
+  .dots.g i.on{background:#b02a30;border-color:#7a1219}
+
+  /* 骰子：盖在纸上的戳 */
+  .stampLayer{position:absolute;inset:0;z-index:20;display:none;align-items:center;justify-content:center;
+    background:rgba(10,6,4,.55)}
+  .stampLayer.on{display:flex;animation:pop .18s}
+  @keyframes pop{from{opacity:0;transform:scale(1.06)}to{opacity:1;transform:scale(1)}}
+  .stampCard{width:760px;background:
+      radial-gradient(120% 90% at 20% 4%,rgba(255,255,250,.9),transparent 58%),
+      linear-gradient(170deg,#f6eed8,#e6dcbf);
+    border:1px solid #b6a582;padding:34px 40px;transform:rotate(-1.4deg);
+    box-shadow:0 40px 80px rgba(0,0,0,.85);color:var(--ink)}
+  .stampCard .top{display:flex;align-items:center;gap:26px}
+  .die{width:150px;height:150px;flex:none;filter:drop-shadow(0 8px 18px rgba(0,0,0,.45))}
+  .die.shake{animation:sh .1s linear infinite}
+  @keyframes sh{0%{transform:rotate(-7deg)}50%{transform:rotate(7deg) translateY(-4px)}100%{transform:rotate(-7deg)}}
+  .verdict{font-family:var(--mono);font-size:30px;letter-spacing:.22em;color:var(--grn);
+    border:3px double currentColor;border-radius:4px;padding:10px 22px;display:inline-block;
+    transform:rotate(-3deg);opacity:.9}
+  .verdict.no{color:var(--red)} .verdict.crit{color:#8a6520}
+  .eq{margin-top:14px;font-family:var(--mono);font-size:13px;color:var(--inkL)}
+  .rt{margin-top:18px;font-family:var(--serif);font-size:18px;line-height:2.05;color:var(--ink)}
+  .re{margin-top:14px;font-family:var(--mono);font-size:13px;color:var(--red)}
+  .rn{margin-top:22px;text-align:right}
+  .stampbtn{display:inline-block;padding:10px 26px;cursor:pointer;border:2px solid var(--red);
+    border-radius:3px;font-family:var(--mono);font-size:14px;letter-spacing:.2em;color:var(--red);
+    background:rgba(140,26,32,.06);transform:rotate(-1deg)}
+  .stampbtn:hover{background:var(--red);color:#f6eed8}
+
+  .end{position:absolute;inset:0;z-index:30;display:none;flex-direction:column;align-items:center;justify-content:center;
+    gap:18px;background:rgba(6,4,3,.92)}
+  .end.on{display:flex}
+  .end .t{font-family:var(--serif);font-size:44px;letter-spacing:.3em}
+  .end .d{font-family:var(--serif);font-size:17px;line-height:2.2;color:#ded3bf;text-align:center;max-width:680px}
+  .back{position:absolute;left:22px;bottom:12px;z-index:9;font-size:12px;color:#c9b795;cursor:pointer;
+    border:1px solid #6b5230;border-radius:3px;padding:6px 14px;background:rgba(10,6,5,.8)}
+  .back:hover{color:var(--gold);border-color:var(--gold)}
+</style>
+</head>
+<body>
+<div id="stage">
+<div class="screen" id="screen">
+  <div class="lamp"></div>
+
+  <div class="folder">
+    <div class="tab" id="tab">ARCHIVE / 第七层 · 三号厅</div>
+    <div class="notes">
+      <div class="note">心态 <span class="dots h" id="pHp"></span></div>
+      <div class="note">贪婪 <span class="dots g" id="pGreed"></span></div>
+      <div class="note">筹码 <b id="nChip">3</b></div>
+    </div>
+
+    <div class="sheets">
+      <div class="page l">
+        <div class="photo">
+          <div class="clip"></div>
+          <div class="pic" id="pic"></div>
+          <div class="cap" id="picCap">SUBJECT 07-B</div>
+        </div>
+        <div class="facts" id="facts"></div>
+        <div class="stampmark" id="stampMark">归 档 中</div>
+      </div>
+
+      <div class="page r">
+        <div class="rhd">
+          <span class="w" id="who">主 持 人 · 大 A</span>
+          <span class="sp"></span>
+          <small id="rmk">笔录 第 1 页</small>
+        </div>
+        <div class="say" id="say"></div>
+        <div class="aside" id="aside"></div>
+        <div class="acts" id="acts"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stampLayer" id="stampLayer">
+    <div class="stampCard">
+      <div class="top">
+        <div class="die" id="die"></div>
+        <div style="flex:1">
+          <div id="verdictWrap"></div>
+          <div class="eq" id="rEq"></div>
+        </div>
+      </div>
+      <div class="rt" id="rT"></div>
+      <div class="re" id="rE"></div>
+      <div class="rn"><span class="stampbtn" onclick="closeIt()">归 档 ▸</span></div>
+    </div>
+  </div>
+
+  <div class="end" id="end">
+    <div class="t" id="endT"></div>
+    <div class="d" id="endD"></div>
+    <div style="display:flex;gap:12px;margin-top:8px">
+      <span class="stampbtn" onclick="restart()">再 走 一 遍</span>
+      <span class="stampbtn" style="border-color:#d9a441;color:#d9a441" onclick="location.href='style-index.html'">换 个 样 式</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="engine.js"></script>
+<script>
+const Q=(s)=>document.querySelector(s);
+const S=GAME.newState();
+let busy=false,typing=null;
+
+function fit(){const s = Math.min(innerWidth / 1620, (innerHeight - 46) / 960);Q('#screen').style.transform='scale('+s+')';}
+addEventListener('resize',fit);fit();
+
+function dieSVG(n,st){
+  const g=st==='crit'?['#fffbe8','#f2d071','#b8860b']:st==='no'?['#e8a0a8','#a3232b','#5e1016']:['#fdf3d8','#e2cd9c','#a98c56'];
+  const ink=st==='no'?'#fff2f3':'#2b2013';
+  const u='g'+Math.random().toString(36).slice(2,7);
+  return `<svg viewBox="0 0 200 200" style="width:100%;height:100%">
+    <defs><linearGradient id="${u}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${g[0]}"/><stop offset=".46" stop-color="${g[1]}"/><stop offset="1" stop-color="${g[2]}"/></linearGradient></defs>
+    <polygon points="100,6 170,46 170,154 100,194 30,154 30,46" fill="url(#${u})" stroke="#6b5230" stroke-width="3"/>
+    <polygon points="100,6 170,46 100,100" fill="rgba(255,255,255,.34)"/>
+    <polygon points="170,46 170,154 100,100" fill="rgba(0,0,0,.07)"/>
+    <polygon points="170,154 100,194 100,100" fill="rgba(0,0,0,.15)"/>
+    <polygon points="100,194 30,154 100,100" fill="rgba(0,0,0,.22)"/>
+    <polygon points="30,154 30,46 100,100" fill="rgba(0,0,0,.1)"/>
+    <polygon points="30,46 100,6 100,100" fill="rgba(255,255,255,.18)"/>
+    <text x="100" y="122" text-anchor="middle" font-family="ui-monospace,monospace"
+      font-size="${String(n).length>1?74:86}" font-weight="900" fill="${ink}">${n}</text></svg>`;
+}
+function dots(el,n,max){el.innerHTML=Array.from({length:max},(_,i)=>`<i class="${i<n?'on':''}"></i>`).join('');}
+
+function render(){
+  dots(Q('#pHp'),S.hp,S.hpMax); dots(Q('#pGreed'),S.greed,S.greedMax);
+  Q('#nChip').textContent=S.chip;
+  Q('#facts').innerHTML=
+    `<div><span class="k">属性</span>　`+Object.entries(S.attrs).map(([k,v])=>`${k} ${v}`).join('　')+`</div>`+
+    `<div><span class="k">道具</span>　`+Object.entries(GAME.ITEMS).map(([k,d])=>`${d.name}×${S.items[k]||0}`).join('　')+`</div>`+
+    (S.obs?`<div><span class="k">执念</span>　<span class="v">${Math.max(0,S.obs.cur)} / ${S.obs.max}</span></div>`:'')+
+    `<div><span class="k">备注</span>　对象会出示经过伪造的行情记录，不要相信它手里的纸。</div>`;
+  Q('#stampMark').textContent = S.obs ? (S.obs.cur<=0?'已 散':'归 档 中') : '待 归 档';
+}
+function typeInto(el,text,done){
+  clearInterval(typing);let i=0;
+  el.innerHTML='<span class="cur"></span>';
+  typing=setInterval(()=>{
+    i+=2; if(i%7===0) GAME.sfx('tick');
+    el.innerHTML=text.slice(0,i).replace(/\n/g,'<br>')+'<span class="cur"></span>';
+    if(i>=text.length){clearInterval(typing);el.innerHTML=text.replace(/\n/g,'<br>');done&&done();}
+  },16);
+}
+function playBeat(){
+  const b=GAME.BEATS[S.beat];
+  busy=true;
+  S.obs=b.obs?{cur:b.obs.cur,max:b.obs.max}:null;
+  Q('#who').textContent=b.who;
+  Q('#rmk').textContent='笔录 第 '+(S.beat+1)+' 页';
+  Q('#pic').style.backgroundImage=`url('${b.art}')`;
+  Q('#picCap').textContent='SUBJECT '+String(S.beat+1).padStart(2,'0')+' · '+(b.who.split('·')[1]||'').trim();
+  Q('#acts').classList.remove('on'); Q('#acts').innerHTML='';
+  Q('#aside').textContent='';
+  render();
+  typeInto(Q('#say'),b.text,()=>{
+    Q('#aside').textContent=b.aside||'';
+    deal(b.acts); busy=false;
+  });
+}
+function deal(acts){
+  Q('#acts').innerHTML=acts.map((a,i)=>{
+    const cls=a.dc>=16?'hard':a.dc<=11?'easy':'';
+    return `<div class="act" onclick="pick(${i})">
+      <span class="no">${i+1}.</span>
+      <span class="tx"><b>${a.t}</b><span>${a.d}</span></span>
+      <span class="dc ${cls}">${a.attr} ${a.dc}</span></div>`;
+  }).join('');
+  Q('#acts').classList.add('on');
+}
+function pick(i){
+  if(busy) return; busy=true;
+  GAME.sfx('click');
+  const act=GAME.BEATS[S.beat].acts[i];
+  const res=GAME.roll(S,act);
+  Q('#acts').classList.remove('on');
+  const layer=Q('#stampLayer'); layer.classList.add('on');
+  const die=Q('#die'); die.className='die shake';
+  Q('#verdictWrap').innerHTML='';
+  Q('#rEq').textContent=`${act.attr} +${S.attrs[act.attr]}  vs  难度 ${act.dc}`;
+  Q('#rT').textContent=''; Q('#rE').textContent='';
+  let n=0;
+  const spin=setInterval(()=>{
+    const f=1+Math.floor(Math.random()*20);
+    die.innerHTML=dieSVG(f,'roll'); GAME.sfx('tick');
+    if(++n>12){clearInterval(spin);settle();}
+  },60);
+  function settle(){
+    const o=GAME.outcome(S,act,res);
+    GAME.apply(S,o.eff);
+    die.className='die';
+    die.innerHTML=dieSVG(res.r,res.crit?'crit':res.pass?'ok':'no');
+    const cls=res.crit?'crit':res.pass?'':'no';
+    Q('#verdictWrap').innerHTML=`<div class="verdict ${cls}">${o.verdict}</div>`;
+    Q('#rEq').textContent=`${res.attr} ${res.r} + ${res.mod} = ${res.total}   vs   难度 ${res.dc}`;
+    Q('#rT').textContent=o.text;
+    const et=GAME.effText(o.eff);
+    Q('#rE').textContent=et?'· '+et:'';
+    render();
+    if(res.crit) GAME.sfx('crit'); else if(res.pass) GAME.sfx('ok'); else GAME.sfx('no');
+  }
+}
+function closeIt(){
+  GAME.sfx('click');
+  Q('#stampLayer').classList.remove('on');
+  busy=false;
+  const e=GAME.ending(S);
+  if(e) return showEnd(e);
+  const b=GAME.BEATS[S.beat];
+  if(b.obs && S.obs && S.obs.cur>0) return playBeat();
+  S.beat++;
+  if(S.beat>=GAME.BEATS.length) return showEnd(GAME.ending(S));
+  playBeat();
+}
+function showEnd(e){
+  Q('#endT').textContent=e.t;
+  Q('#endT').style.color=e.tone==='bad'?'#ff8f8f':e.tone==='good'?'#7ff0c0':'#f0d878';
+  Q('#endD').textContent=e.d; Q('#end').classList.add('on');
+}
+function restart(){Object.assign(S,GAME.newState());Q('#end').classList.remove('on');playBeat();}
+addEventListener('keydown',(e)=>{
+  if(Q('#stampLayer').classList.contains('on')){if(e.key===' '||e.key==='Enter'){e.preventDefault();closeIt();}return;}
+  if(/^[1-9]$/.test(e.key)){const el=Q('#acts').children[+e.key-1];if(el)el.click();}
+});
+render();playBeat();
+</script>
+<script src="nav.js"></script>
+</body>
+</html>

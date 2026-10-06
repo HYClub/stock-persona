@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>样式七 · 七日</title>
+<link rel="stylesheet" href="nav.css" />
+<style>
+  :root{
+    --red:#e60012; --red2:#ff2b3d; --ink:#0b0b0d;
+    --wt:#f4f2ee; --gray:#8a8a92; --gold:#f5c451; --grn:#2fd39a;
+    --sans:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    --disp:"Arial Black","Microsoft YaHei",system-ui,sans-serif;
+    --mono:ui-monospace,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#050506;font-family:var(--sans)}
+  #stage{position:fixed;inset:46px 0 0 0;display:grid;place-items:center}
+  .screen{position:relative;width:1600px;height:940px;overflow:hidden;transform-origin:center;background:var(--ink)}
+  .slash{position:absolute;inset:-20% -10%;background:var(--red);
+    clip-path:polygon(56% 0,100% 0,100% 100%,34% 100%);transform:skewX(-6deg);opacity:.9}
+  .slash.b{background:#1a0206;clip-path:polygon(60% 0,67% 0,46% 100%,39% 100%);opacity:1}
+  .dots{position:absolute;inset:0;opacity:.14;
+    background-image:radial-gradient(#fff .9px,transparent 1.2px);background-size:6px 6px}
+  .vig{position:absolute;inset:0;background:radial-gradient(95% 85% at 26% 40%,transparent 42%,rgba(0,0,0,.78) 100%)}
+
+  .view{position:absolute;inset:0;display:none;z-index:5}
+  .view.on{display:block}
+
+  /* ═══ 通用零件 ═══ */
+  .tag{display:inline-block;transform:skewX(-10deg);background:var(--wt);padding:4px 14px}
+  .tag span{display:inline-block;transform:skewX(10deg);font-family:var(--disp);font-weight:900;
+    font-size:14px;color:#111;letter-spacing:.06em}
+  .tag.red{background:var(--red)} .tag.red span{color:#fff}
+  .tag.gold{background:var(--gold)} .tag.gold span{color:#2a1a00}
+  .sk{transform:skewX(-10deg)}
+  .sk > *{transform:skewX(10deg)}
+  .pn{background:#0d0d10;border:1px solid #26262c}
+  .pn h4{background:#16161a;border-bottom:1px solid #26262c;padding:8px 14px;
+    font-family:var(--mono);font-size:10.5px;font-weight:400;letter-spacing:.24em;color:var(--gold)}
+  .pn .in{padding:12px 14px}
+  .sp{flex:1}
+  .barrow{display:flex;align-items:center;gap:10px;transform:skewX(-10deg);margin-bottom:7px}
+  .barrow .lb{font-family:var(--mono);font-size:11px;color:#fff;opacity:.75;width:44px}
+  .barrow .tr{width:170px;height:13px;background:rgba(255,255,255,.13);overflow:hidden}
+  .barrow .tr i{display:block;height:100%;background:linear-gradient(90deg,#7ee0b4,#2fd39a)}
+  .barrow .tr.g i{background:linear-gradient(90deg,#ff2b3d,#7d0110)}
+  .barrow .tr.o i{background:linear-gradient(90deg,#f5c451,#8a6520)}
+  .barrow .v{font-family:var(--mono);font-size:12px;color:#fff;width:46px}
+
+  .btn{cursor:pointer;background:#000;border-left:4px solid var(--red);padding:12px 20px;
+    font-family:var(--disp);font-weight:900;font-size:16px;color:#fff;
+    transform:skewX(-10deg);transition:.12s;display:inline-block}
+  .btn > span{display:inline-block;transform:skewX(10deg)}
+  .btn:hover{background:var(--red);transform:skewX(-10deg) translateX(8px)}
+  .btn.ghost{background:#111;border-left-color:#444;color:#bbb}
+  .btn.ghost:hover{background:#333;color:#fff}
+  .btn.gold{border-left-color:var(--gold)} .btn.gold:hover{background:var(--gold);color:#2a1a00}
+  .btn[disabled],.btn.off{opacity:.35;pointer-events:none}
+
+  /* ═══ 顶栏 ═══ */
+  .top{position:absolute;top:0;left:0;right:0;z-index:9;height:58px;display:flex;align-items:center;
+    gap:14px;padding:0 22px;background:linear-gradient(180deg,rgba(0,0,0,.88),transparent)}
+  .top .day{transform:skewX(-10deg);background:var(--red);padding:6px 18px}
+  .top .day span{display:inline-block;transform:skewX(10deg);font-family:var(--disp);font-weight:900;
+    font-size:16px;color:#fff;letter-spacing:.08em}
+  .top .slot{font-family:var(--mono);font-size:12.5px;letter-spacing:.2em;color:#fff;opacity:.8}
+
+  /* ═══ 日历 ═══ */
+  #v-cal .cols{position:absolute;inset:58px 0 0 0;display:flex;gap:14px;padding:14px 22px 20px}
+  .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+  .daycell{position:relative;height:66px;background:#111;border:1px solid #2a2a30;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+  .daycell .n{font-family:var(--disp);font-weight:900;font-size:20px;color:#555}
+  .daycell .s{display:flex;gap:4px}
+  .daycell .s i{width:9px;height:9px;background:#333}
+  .daycell.done .s i{background:var(--grn)}
+  .daycell.now{border-color:var(--red);background:#1a0508}
+  .daycell.now .n{color:#fff}
+  .daycell.now .s i.cur{background:var(--red);box-shadow:0 0 8px var(--red)}
+
+  .confrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #1e1e24}
+  .confrow:last-child{border-bottom:0}
+  .confrow img{width:36px;height:44px;object-fit:cover;object-position:top;filter:contrast(1.05)}
+  .confrow .nm{flex:1;font-size:12.5px;color:#ddd}
+  .confrow .nm small{display:block;font-family:var(--mono);font-size:10px;color:var(--gray);margin-top:2px}
+  .confrow .lv{display:flex;gap:2px}
+  .confrow .lv i{width:11px;height:11px;background:#26262c;transform:skewX(-10deg)}
+  .confrow .lv i.on{background:var(--gold)}
+
+  .roomrow{display:flex;align-items:center;gap:12px;padding:11px 13px;margin-bottom:7px;
+    background:#111;border-left:4px solid #333}
+  .roomrow.done{border-left-color:var(--grn);opacity:.55}
+  .roomrow.boss{border-left-color:var(--red)}
+  .roomrow .nm{display:block;font-family:var(--disp);font-weight:900;font-size:15px;color:#fff}
+  .roomrow .ds{display:block;font-size:11px;color:var(--gray);margin-top:4px;line-height:1.6}
+  .roomrow .go{margin-left:auto}
+
+  /* 日历页撑满：面板纵向拉伸，行动块均分剩余高度 */
+  #v-cal .col{display:flex;flex-direction:column;gap:12px;min-height:0}
+  #v-cal .pn{display:flex;flex-direction:column;min-height:0}
+  #v-cal .pn.grow{flex:1}
+  #v-cal .pn.grow > .in{flex:1;min-height:0;display:flex;flex-direction:column}
+  #actionList{flex:1;display:flex;flex-direction:column;gap:9px;min-height:0}
+  #actionList > .roomrow{flex:1;margin-bottom:0;min-height:56px}
+  #logBox{flex:1;min-height:0;overflow:hidden;font-size:11.5px;line-height:1.75;color:#9a9aa4}
+  #logBox div{padding:5px 0;border-bottom:1px solid #1a1a20}
+  #logBox div:first-child{color:#d8d8e0}
+  #logBox b{color:var(--gold);font-weight:600}
+
+  /* ═══ 行动选择 ═══ */
+  .pickwrap{position:absolute;inset:58px 0 0 0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:16px}
+  .pickgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;width:1000px}
+  .pickcard{background:#111;border:1px solid #2a2a30;border-left:5px solid var(--red);cursor:pointer;
+    padding:18px 22px;transition:.13s}
+  .pickcard:hover{background:#1c0609;border-color:var(--red);transform:translateX(8px)}
+  .pickcard .nm{font-family:var(--disp);font-weight:900;font-size:19px;color:#fff}
+  .pickcard .ds{font-size:12px;color:var(--gray);margin-top:6px;line-height:1.7}
+
+  /* ═══ 见人 / 谈判 ═══ */
+  .facewrap{position:absolute;inset:58px 0 0 0;display:flex}
+  .facewrap .por{width:420px;background-size:cover;background-position:center top;
+    -webkit-mask-image:linear-gradient(90deg,#000 62%,transparent);mask-image:linear-gradient(90deg,#000 62%,transparent)}
+  .facewrap .body{flex:1;padding:40px 60px 100px 20px;display:flex;flex-direction:column;gap:16px}
+  /* 名牌别被 flex 拉满整行 */
+  .facewrap .body > .tag{align-self:flex-start}
+  .say{font-size:19px;line-height:2.05;color:#e6e1d9;white-space:pre-line}
+  .say em{font-style:normal;color:var(--gold)}
+  .choices{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+
+  /* ═══ 战斗 ═══ */
+  .foe{position:absolute;right:64px;top:62px;width:380px}
+  .foe .fwrap{height:380px;background:var(--red);padding:5px;
+    clip-path:polygon(4% 0,100% 3%,97% 97%,0 100%);transform:rotate(1.4deg)}
+  .foe .frame{position:relative;height:100%;background:#000;
+    clip-path:polygon(4% 0,100% 3%,97% 97%,0 100%);overflow:hidden}
+  .foe .frame .art{position:absolute;inset:0;background-size:cover;background-position:center;filter:contrast(1.12)}
+  .foe .plate{position:absolute;left:-24px;bottom:-16px;transform:skewX(-10deg);background:var(--wt);padding:6px 20px}
+  .foe .plate span{display:inline-block;transform:skewX(10deg);font-family:var(--disp);font-weight:900;font-size:17px;color:#111}
+  .foe .weak{position:absolute;right:-12px;top:-12px;transform:rotate(9deg);background:var(--red);padding:5px 14px}
+  .foe .weak span{font-family:var(--disp);font-weight:900;font-size:13px;color:#fff}
+  .foe .weak.unknown{background:#2a2a30} .foe .weak.unknown span{color:var(--gray)}
+  .foe .ebar{position:absolute;left:6px;right:6px;bottom:-42px;height:14px;transform:skewX(-10deg);
+    background:rgba(0,0,0,.75);border:1px solid var(--red);overflow:hidden}
+  .foe .ebar i{display:block;height:100%;background:linear-gradient(90deg,#ff2b3d,#7d0110);transition:width .4s}
+  .foe .ebarV{position:absolute;right:6px;bottom:-64px;font-family:var(--mono);font-size:12px;color:#fff}
+  .foe .lock{position:absolute;left:-18px;top:42%;transform:rotate(-9deg);background:var(--gold);padding:6px 18px;display:none}
+  .foe .lock.on{display:block}
+  .foe .lock span{font-family:var(--disp);font-weight:900;font-size:18px;color:#2a1a00;letter-spacing:.2em}
+
+  .me2{position:absolute;left:40px;bottom:40px;display:flex;flex-direction:column;gap:8px}
+  .me2 .por{width:150px;height:200px;background-size:cover;background-position:center top;
+    clip-path:polygon(0 4%,98% 0,100% 100%,3% 97%);box-shadow:0 0 0 3px #000,0 0 0 4px rgba(255,255,255,.16)}
+  .me2 .nm{transform:skewX(-10deg);background:var(--wt);padding:5px 14px;align-self:flex-start}
+  .me2 .nm span{display:inline-block;transform:skewX(10deg);font-family:var(--disp);font-weight:900;font-size:13px;color:#111}
+  .stats2{position:absolute;left:212px;bottom:250px}
+  .mask2{position:absolute;left:212px;bottom:40px;width:240px;border:1px solid var(--red);background:#0d0d10;cursor:pointer}
+  .mask2 .mh{background:var(--red);padding:6px 10px;font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:#fff}
+  .mask2 .mb{padding:9px 11px}
+  .mask2 .mn{font-family:var(--disp);font-weight:900;font-size:16px;color:#fff}
+  .mask2 .ms{font-family:var(--mono);font-size:10.5px;color:var(--gold);margin-top:5px}
+  .cmd2{position:absolute;right:64px;bottom:40px;width:540px}
+  .cmd2 .row{display:flex;align-items:center;gap:12px;height:48px;margin-bottom:6px;cursor:pointer;
+    transform:skewX(-10deg);background:#000;border-left:4px solid var(--red);transition:.12s}
+  .cmd2 .row .inner{display:flex;align-items:center;gap:12px;flex:1;padding:0 16px;transform:skewX(10deg)}
+  .cmd2 .row .t{font-family:var(--disp);font-weight:900;font-size:16px;color:#fff}
+  .cmd2 .row .d{font-size:10.5px;color:var(--gray);flex:1}
+  .cmd2 .row .at{font-family:var(--mono);font-size:11px;color:#fff;background:rgba(255,255,255,.12);padding:3px 9px}
+  .cmd2 .row:hover{background:var(--red);transform:skewX(-10deg) translateX(10px)}
+  .cmd2 .row.skill{border-left-color:var(--gold)}
+  .cmd2 .row.skill .at{background:rgba(245,196,81,.2);color:var(--gold)}
+  .cmd2 .row.no{opacity:.35;pointer-events:none}
+
+  /* ═══ 大字 / 面板 ═══ */
+  .pop{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:30;opacity:0;
+    pointer-events:none;text-align:center}
+  .pop.on{animation:popin .5s cubic-bezier(.2,1.5,.4,1) forwards}
+  @keyframes popin{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(-18deg)}
+    60%{opacity:1;transform:translate(-50%,-50%) scale(1.16) rotate(-6deg)}
+    100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-8deg)}}
+  .pop .big{font-family:var(--disp);font-weight:900;font-size:86px;color:#fff;transform:scaleY(1.16);
+    text-shadow:6px 6px 0 var(--red),0 0 60px rgba(230,0,18,.7)}
+  .pop .sub{margin-top:6px;font-family:var(--mono);font-weight:700;font-size:14px;letter-spacing:.4em;color:var(--red2)}
+
+  .panel{position:absolute;inset:0;z-index:25;display:none;align-items:center;justify-content:center;background:rgba(5,5,6,.84)}
+  .panel.on{display:flex}
+  .pbox{width:1000px;background:#0d0d10;border:2px solid var(--red);
+    clip-path:polygon(0 2%,99% 0,100% 98%,1% 100%);padding:30px 42px}
+  .pbox .ph{display:flex;align-items:baseline;gap:16px;margin-bottom:14px}
+  .pbox .pv{font-family:var(--disp);font-weight:900;font-size:27px;color:#fff;transform:skewX(-8deg)}
+  .pbox .pe{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--gray)}
+  .pbox .pt{font-size:17px;line-height:2;color:#ded9d2;white-space:pre-line}
+  .pbox .pn2{margin-top:12px;font-family:var(--mono);font-size:11.5px;color:var(--gray);line-height:1.9;
+    border-left:3px solid var(--red);padding-left:12px}
+  .pbox .pf{margin-top:14px;font-family:var(--mono);font-size:13px;color:var(--gold)}
+  .pbox .pg{margin-top:20px;text-align:right}
+
+  .allout{position:absolute;inset:0;z-index:40;display:none;overflow:hidden;background:#000}
+  .allout.on{display:block}
+  .allout .stripe{position:absolute;left:-20%;right:-20%;height:150px;background:var(--red);transform:rotate(-8deg);top:34%}
+  .allout .txt{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-8deg);text-align:center}
+  .allout .txt b{display:block;font-family:var(--disp);font-weight:900;font-size:88px;color:#fff;
+    transform:scaleY(1.2);text-shadow:8px 8px 0 #000}
+  .allout .txt i{display:block;font-style:normal;font-family:var(--mono);font-size:14px;letter-spacing:.5em;color:#fff;margin-top:8px}
+  .allout.on .stripe{animation:swipe .5s cubic-bezier(.2,1,.3,1) both}
+  @keyframes swipe{from{transform:rotate(-8deg) translateX(110%)}to{transform:rotate(-8deg) translateX(0)}}
+  .allout.on .txt{animation:popin .6s .2s cubic-bezier(.2,1.5,.4,1) both}
+
+  .toast{position:absolute;left:50%;top:70px;transform:translateX(-50%);z-index:60;padding:8px 18px;
+    background:#000;border:1px solid var(--red);font-family:var(--mono);font-size:12.5px;color:#fff;
+    opacity:0;transition:.25s;pointer-events:none}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(6px)}
+</style>
+</head>
+<body>
+<div id="stage">
+<div class="screen" id="screen">
+  <div class="slash"></div><div class="slash b"></div><div class="dots"></div><div class="vig"></div>
+
+  <div class="top">
+    <div class="day"><span id="dayTag">第 1 天</span></div>
+    <div class="slot" id="slotTag">白天 · 还有 2 个时段</div>
+    <span class="sp"></span>
+    <div class="slot" id="hudMask">面具 · 价值投资</div>
+    <div class="slot" id="hudDepot">保证金 6</div>
+  </div>
+
+  <!-- ═══════ 日历 ═══════ -->
+  <div class="view on" id="v-cal">
+    <div class="cols">
+      <div class="col" style="flex:0 0 250px">
+        <div class="pn"><h4>社会属性</h4><div class="in" id="socialBox"></div></div>
+        <div class="pn"><h4>状态</h4><div class="in" id="stateBox"></div></div>
+        <div class="pn grow"><h4>日 志</h4><div class="in" id="logBox"></div></div>
+      </div>
+      <div class="col" style="flex:1;min-width:0">
+        <div class="pn"><h4>七 日</h4><div class="in"><div class="calgrid" id="calGrid"></div></div></div>
+        <div class="pn grow"><h4>今 天 要 做 什 么</h4>
+          <div class="in" id="actionList"></div></div>
+      </div>
+      <div class="col" style="flex:0 0 290px;overflow:hidden">
+        <div class="pn"><h4>营 业 部 的 人</h4><div class="in" id="confBox"></div></div>
+        <div class="pn"><h4>楼 层</h4><div class="in" id="floorBox"></div></div>
+        <div class="pn grow"><h4>面 具</h4><div class="in" id="maskBox"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 行动选择（时段）═══════ -->
+  <div class="view" id="v-act">
+    <div class="pickwrap">
+      <div class="tag red"><span id="actTitle">第 1 天 · 白天</span></div>
+      <div style="font-size:13px;color:var(--gray)">每个时段只能做一件事。七天，十四个时段。</div>
+      <div class="pickgrid" id="actGrid"></div>
+      <div class="btn ghost" onclick="go('cal')"><span>返回</span></div>
+    </div>
+  </div>
+
+  <!-- ═══════ 见人 ═══════ -->
+  <div class="view" id="v-social">
+    <div class="facewrap">
+      <div class="por" id="socPor"></div>
+      <div class="body">
+        <div class="tag gold"><span id="socName"></span></div>
+        <div class="say" id="socSay"></div>
+        <div class="choices" id="socChoices"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 楼层 ═══════ -->
+  <div class="view" id="v-floor">
+    <div class="pickwrap">
+      <div class="tag red"><span>第七层 · 三号厅</span></div>
+      <div style="font-size:13px;color:var(--gray)">一层楼三个房间。每进一次花一个时段。</div>
+      <div class="pickgrid" id="roomGrid" style="width:900px;grid-template-columns:1fr"></div>
+      <div class="btn ghost" onclick="go('cal')"><span>返回</span></div>
+    </div>
+  </div>
+
+  <!-- ═══════ 战斗 ═══════ -->
+  <div class="view" id="v-battle">
+    <div class="foe">
+      <div class="fwrap"><div class="frame"><div class="art" id="bFoeArt"></div></div></div>
+      <div class="lock" id="bLock"><span>套 牢</span></div>
+      <div class="weak unknown" id="bWeak"><span>死穴 ???</span></div>
+      <div class="plate"><span id="bFoeName"></span></div>
+      <div class="ebar"><i id="bObs" style="width:100%"></i></div>
+      <div class="ebarV" id="bObsV">8 / 8</div>
+    </div>
+    <div class="me2">
+      <div class="por" style="background-image:url('img/trader.jpg')"></div>
+      <div class="nm"><span>无 名 散 户</span></div>
+    </div>
+    <div class="stats2">
+      <div class="barrow"><span class="lb">心态</span><div class="tr"><i id="bHp" style="width:80%"></i></div><span class="v" id="bHpV">8/10</span></div>
+    </div>
+    <div class="mask2" id="bMaskCard" onclick="openMask()">
+      <div class="mh">CURRENT / 当 前 人 格</div>
+      <div class="mb"><div class="mn" id="bMaskName"></div><div class="ms" id="bMaskSkill"></div></div>
+    </div>
+    <div class="cmd2"><div id="bRows"></div></div>
+  </div>
+
+  <!-- ═══════ 结算 / 结局 ═══════ -->
+  <div class="view" id="v-end">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+                justify-content:center;gap:18px;padding:0 90px;text-align:center">
+      <div id="endT" style="font-family:var(--disp);font-weight:900;font-size:48px;color:#fff;transform:scaleY(1.15)"></div>
+      <div id="endD" style="font-size:15.5px;line-height:2.1;color:#b9b4ad;max-width:760px;white-space:pre-line"></div>
+      <div id="endStat" style="font-family:var(--mono);font-size:12.5px;color:var(--gray);line-height:2"></div>
+      <div style="display:flex;gap:12px;margin-top:8px">
+        <div class="btn" onclick="location.reload()"><span>再 来 七 天</span></div>
+        <div class="btn ghost" onclick="location.href='style-index.html'"><span>换 个 样 式</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 浮层 -->
+  <div class="allout" id="allout">
+    <div class="stripe"></div>
+    <div class="txt"><b>一 致 行 动</b><i>CONCERTED ACTION</i></div>
+  </div>
+
+  <div class="pop" id="pop"><div class="big" id="popBig"></div><div class="sub" id="popSub"></div></div>
+  <div class="panel" id="panel">
+    <div class="pbox">
+      <div class="ph"><span class="pv" id="pv"></span><span class="pe" id="pe"></span></div>
+      <div class="pt" id="pt"></div><div class="pn2" id="pn2"></div><div class="pf" id="pf"></div>
+      <div class="pg" id="pg"></div>
+    </div>
+  </div>
+  <div class="panel" id="maskPanel">
+    <div class="pbox" style="width:1080px">
+      <div class="ph"><span class="pv">面 具</span><span class="pe">装备一副 · 也可以把两副融成一副</span></div>
+      <div id="maskList" style="display:flex;gap:12px;flex-wrap:wrap"></div>
+      <div style="margin-top:18px;border-top:1px solid #26262c;padding-top:14px">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--gold);margin-bottom:10px">融 合 · 选两副</div>
+        <div id="fuseBox" style="display:flex;gap:12px;flex-wrap:wrap"></div>
+        <div style="margin-top:12px"><div class="btn gold" id="fuseBtn"><span>融 合</span></div></div>
+      </div>
+      <div class="pg"><div class="btn ghost" onclick="closeMask()"><span>关 上</span></div></div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+</div>
+
+<script src="engine.js"></script>
+<script src="nav.js"></script>
+<script>
+const Q=(s)=>document.querySelector(s);
+const $=(s)=>document.querySelector(s);
+
+/* ══════════════════════════════════════════════
+   数据
+   ══════════════════════════════════════════════ */
+const CONFS=[
+  { id:'lin', name:'林 晚', role:'记者', img:'img/p-reporter.jpg', stat:'洞察',
+    lines:['「今天的涨停板里有四家是同一个营业部买的。你要不要看看名单？」',
+           '「我查过户，那间营业部三年前就注销了。」',
+           '「有些事我不能写。但我可以告诉你。」'] },
+  { id:'zhao', name:'赵 先 生', role:'老操盘手', img:'img/p-veteran.jpg', stat:'胆量',
+    lines:['「你怕它，它就赢一半了。」',
+           '「我做了三十年，只看一件事 —— 谁在跑。」',
+           '「敢在跌停上接货的人，这层楼里不超过三个。」'] },
+  { id:'ayi', name:'保 洁 阿 姨', role:'在这里最久的人', img:'img/p-cleaner.jpg', stat:'定力',
+    lines:['「你坐的那个位置，之前那个人也没走。」',
+           '「我不懂你们看的东西。我只知道，走得最晚的人脸色最难看。」',
+           '「灯我给你留着。」'] },
+  { id:'bao', name:'门 口 保 安', role:'值班', img:'img/p-guard.jpg', stat:'运气',
+    lines:['「今晚我值班。你几点走都行。」',
+           '「上个月有个客人，赢了钱，第二天就不来了。」',
+           '「我这儿有个东西，不知道谁的。你要不要？」'] },
+  { id:'self', name:'镜 子 里 的 人', role:'你自己', img:'img/trader.jpg', stat:'手速',
+    lines:['「你今天按了几次刷新？」',
+           '「再快一点。再快一点就来得及。」',
+           '「你不觉得，你最近说话越来越像它了吗。」'] },
+];
+
+const MASKS=[
+  { id:'value', name:'价 值 投 资', mod:{定力:2,洞察:1,手速:-1}, skill:{name:'长 期 持 有',cost:2} },
+  { id:'momentum', name:'短 线 打 板', mod:{手速:3,定力:-1}, skill:{name:'打 板',cost:3} },
+  { id:'herd', name:'跟 风', mod:{运气:3,洞察:-1}, skill:{name:'人 多 的 地 方',cost:2} },
+  { id:'short', name:'做 空', mod:{胆量:1,定力:1}, skill:{name:'反 手',cost:2} },
+  { id:'dealer', name:'庄 家', mod:{胆量:1,洞察:1,定力:1,手速:1,运气:1}, skill:{name:'对 倒',cost:4} },
+];
+
+const FOES=[
+  { id:'reaper', name:'韭 菜 收 割 者', img:'img/m-reaper.jpg', obs:9, weak:'定力',
+    why:'它全部的招都是"让你受不了"。你受得了，它就没有下一步。' },
+  { id:'succubus', name:'妖 股 魅 魔', img:'img/m-succubus.jpg', obs:11, weak:'手速',
+    why:'它赌的是你犹豫。抢在它反应过来之前进去。' },
+];
+
+const MOVES=[
+  { t:'看 盘', attr:'洞察', dc:13 },
+  { t:'硬 扛', attr:'胆量', dc:14 },
+  { t:'忍 住', attr:'定力', dc:12 },
+];
+const SOCIALS=['见识','胆识','手腕','人情','心气'];
+const ACTS=[
+  { id:'meet', nm:'见 一 个 人', ds:'跟营业部里的人处一会儿。社群等级 +1，社会属性 +1。' },
+  { id:'floor', nm:'上 楼 层', ds:'推进主线。三个房间：调查 / 遭遇 / 首领。' },
+  { id:'read', nm:'看 档 案', ds:'翻一天的成交记录。一个社会属性 +2。' },
+  { id:'rest', nm:'休 息', ds:'什么都不做。心态 +3。' },
+];
+
+/* ══════════════════════════════════════════════
+   状态
+   ══════════════════════════════════════════════ */
+let G;
+
+function newG(){
+  G={
+    day:1, slot:0, hp:8, hpMax:10, depot:6,
+    social:{见识:0,胆识:0,手腕:0,人情:0,心气:0},
+    conf:{lin:1,zhao:1,ayi:1,bao:1,self:1},
+    masks:['value'], equip:'value', alert:0,
+    rooms:[{id:'look',nm:'查 看 那 张 纸',ds:'不打架。看一眼它藏起来的东西。',done:false},
+           {id:'fight',nm:'遭 遇 · 韭 菜 收 割 者',ds:'正面碰上它。',done:false},
+           {id:'boss',nm:'首 领 · 妖 股 魅 魔',ds:'这一层的正主。',done:false}],
+    bossDown:false, revealed:{}, slotsUsed:0, log:[],
+  };
+  addLog('被扔进三号厅。<b>七天</b>，十四个时段，一个出口。');
+}
+
+function addLog(t){
+  G.log.unshift('<b>第'+G.day+'天</b> ' + t);
+  if(G.log.length>40) G.log.pop();
+}
+
+/* ══════════════════════════════════════════════
+   视图
+   ══════════════════════════════════════════════ */
+function go(v){
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('on'));
+  const el=$('#v-'+v); if(el) el.classList.add('on');
+  if(v==='cal') renderCal();
+  if(v==='act') renderActs();
+  if(v==='floor') renderFloor();
+  if(v==='battle') renderBattle();
+  document.querySelector('.top').style.display = v==='end' ? 'none' : 'flex';
+}
+function fit(){const s=Math.min(innerWidth/1620,(innerHeight-46)/960);$('#screen').style.transform='scale('+s+')';}
+addEventListener('resize',fit);fit();
+
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),2000);}
+function pop(b,s,cb){const p=$('#pop');$('#popBig').textContent=b;$('#popSub').textContent=s||'';
+  p.classList.remove('on');void p.offsetWidth;p.classList.add('on');
+  setTimeout(()=>{p.classList.remove('on');cb&&cb();},1050);}
+function panel(v,eq,tx,note,eff,btns){
+  $('#pv').textContent=v;$('#pe').textContent=eq||'';
+  $('#pt').textContent=tx;$('#pn2').textContent=note||'';$('#pf').textContent=eff||'';
+  $('#pg').innerHTML='';
+  (btns||[{t:'继 续 ▸',fn:'closePanel()'}]).forEach(b=>{
+    const d=document.createElement('div');
+    d.className='btn'+(b.ghost?' ghost':'');
+    d.innerHTML='<span>'+b.t+'</span>';
+    d.onclick=()=>{ if(typeof b.fn==='string') eval(b.fn); else b.fn(); };
+    d.style.marginLeft='10px'; d.style.display='inline-block';
+    $('#pg').append(d);
+  });
+  $('#panel').classList.add('on');
+}
+function closePanel(){ GAME.sfx('click'); $('#panel').classList.remove('on'); }
+
+/* ══════════════════════════════════════════════
+   日历
+   ══════════════════════════════════════════════ */
+function renderCal(){
+  const d=G.day, s=G.slot, left=(7-d)*2+(2-s);
+  $('#dayTag').textContent='第 '+d+' 天';
+  $('#slotTag').textContent=(s===0?'白天':'晚上')+' · 还剩 '+left+' 个时段';
+  $('#hudMask').textContent='面具 · '+MASKS.find(m=>m.id===G.equip).name;
+  $('#hudDepot').textContent='保证金 '+G.depot;
+
+  $('#calGrid').innerHTML=Array.from({length:7},(_,i)=>{
+    const n=i+1, isDone=n<d, isNow=n===d;
+    const dots=[0,1].map(k=>{
+      const cls = isDone?'':(isNow && k===s ? 'cur':'');
+      return `<i class="${cls}"></i>`;
+    }).join('');
+    return `<div class="daycell ${isDone?'done':''} ${isNow?'now':''}">
+      <div class="n">${n}</div><div class="s">${dots}</div></div>`;
+  }).join('');
+
+  $('#socialBox').innerHTML=SOCIALS.map(k=>
+    `<div class="barrow"><span class="lb">${k}</span><div class="tr o"><i style="width:${Math.min(100,G.social[k]*20)}%"></i></div><span class="v">${G.social[k]}</span></div>`).join('');
+
+  const depotMax=8+Math.floor(G.social['见识']/3);
+  $('#stateBox').innerHTML=
+    `<div class="barrow"><span class="lb">心态</span><div class="tr"><i style="width:${G.hp/G.hpMax*100}%"></i></div><span class="v">${G.hp}/${G.hpMax}</span></div>`+
+    `<div class="barrow"><span class="lb">警戒</span><div class="tr g"><i style="width:${G.alert}%"></i></div><span class="v">${G.alert}%</span></div>`+
+    `<div style="font-family:var(--mono);font-size:11px;color:var(--gray);margin-top:8px;line-height:1.9">
+       保证金 ${G.depot} / ${depotMax}<br>面具 ${G.masks.length} 副</div>`;
+
+  $('#confBox').innerHTML=CONFS.map(c=>{
+    const lv=G.conf[c.id];
+    return `<div class="confrow"><img src="${c.img}"/>
+      <span class="nm">${c.name}<small>${c.role} · ${c.stat} +${lv}</small></span>
+      <span class="lv">${Array.from({length:5},(_,i)=>`<i class="${i<lv?'on':''}"></i>`).join('')}</span></div>`;
+  }).join('');
+
+  $('#floorBox').innerHTML=G.rooms.map(r=>
+    `<div class="roomrow ${r.done?'done':''} ${r.id==='boss'?'boss':''}">
+      <span><span class="nm">${r.done?'✓ ':''}${r.nm}</span><span class="ds">${r.ds}</span></span></div>`).join('')
+    + `<div style="font-family:var(--mono);font-size:11px;color:var(--gray);margin-top:6px">
+        第七天收盘前必须打倒首领，否则它长到下一层。</div>`;
+
+  $('#logBox').innerHTML = G.log.length
+    ? G.log.map(t=>`<div>${t}</div>`).join('')
+    : `<div style="color:#555">还没有任何记录。<br>七天之后，这里会写下你做过什么。</div>`;
+
+  $('#maskBox').innerHTML=G.masks.map(id=>{
+    const m=MASKS.find(x=>x.id===id);
+    const on=id===G.equip;
+    return `<div class="confrow"><span class="nm" style="color:${on?'var(--gold)':'#ddd'}">${m.name}${on?' · 使用中':''}
+      <small>${Object.entries(m.mod).map(([k,v])=>k+(v>0?'+':'')+v).join(' ')}</small></span></div>`;
+  }).join('') + `<div style="margin-top:10px"><div class="btn ghost" style="font-size:13px;padding:8px 14px" onclick="openMask()"><span>管 理 面 具</span></div></div>`;
+
+  // 今天的行动
+  if(G.slot>=2){ nextDay(); return; }
+  const acts=ACTS.map(a=>({...a,done:false}));
+  $('#actionList').innerHTML=acts.map((a,i)=>
+    `<div class="roomrow" style="cursor:pointer" onclick="doAct('${a.id}')">
+      <span><span class="nm">${a.nm}</span><span class="ds">${a.ds}</span></span>
+      <span class="go"><span class="tag"><span>选它</span></span></span></div>`).join('');
+}
+
+function nextDay(){
+  G.day++; G.slot=0;
+  if(G.day>7) return finish();
+  toast('第 '+G.day+' 天');
+  addLog(`—— 第 ${G.day} 天开始。`);
+  G.depot=Math.min(8+Math.floor(G.social['见识']/3), G.depot+1);
+  renderCal();
+}
+
+function spendSlot(){
+  G.slot++; G.slotsUsed++;
+  if(G.slot>=2) { /* 交给 renderCal 里的 nextDay 处理 */ }
+}
+
+/* ══════════════════════════════════════════════
+   时段行动
+   ══════════════════════════════════════════════ */
+function renderActs(){
+  $('#actTitle').textContent='第 '+G.day+' 天 · '+(G.slot===0?'白天':'晚上');
+  $('#actGrid').innerHTML=ACTS.map(a=>
+    `<div class="pickcard" onclick="doAct('${a.id}')">
+      <div class="nm">${a.nm}</div><div class="ds">${a.ds}</div></div>`).join('');
+}
+function doAct(id){
+  GAME.sfx('click');
+  if(id==='meet') return openMeet();
+  if(id==='floor') return go('floor');
+  if(id==='read'){
+    const k=SOCIALS[Math.floor(Math.random()*3)];
+    G.social[k]=Math.min(5,G.social[k]+2);
+    addLog(`翻旧档案，<b>${k} +2</b>。`);
+    spendSlot(); go('cal');
+    pop('见 识 +2',k);
+    return;
+  }
+  if(id==='rest'){
+    G.hp=Math.min(G.hpMax,G.hp+3);
+    addLog('什么都没做，睡了一觉。<b>心态 +3</b>。');
+    spendSlot(); go('cal');
+    pop('心 态 +3','');
+  }
+}
+
+/* ══════════════════════════════════════════════
+   社群
+   ══════════════════════════════════════════════ */
+function openMeet(){
+  $('#actTitle').textContent='第 '+G.day+' 天 · 见 谁';
+  $('#actGrid').innerHTML=CONFS.map(c=>
+    `<div class="pickcard" onclick="meet('${c.id}')">
+      <div class="nm">${c.name}</div>
+      <div class="ds">${c.role} · 社群 Lv${G.conf[c.id]} · ${c.stat} +${G.conf[c.id]}</div></div>`).join('');
+  go('act');
+}
+function meet(id){
+  const c=CONFS.find(x=>x.id===id);
+  const lv=G.conf[id];
+  GAME.sfx('click');
+  $('#socPor').style.backgroundImage=`url('${c.img}')`;
+  $('#socName').textContent=c.name+' · Lv'+lv;
+  $('#socSay').textContent=c.lines[Math.min(lv-1,c.lines.length-1)];
+  $('#socChoices').innerHTML=
+    `<div class="btn" onclick="meetDo('${id}',1)"><span>听 他 / 她 说 完</span></div>
+     <div class="btn ghost" onclick="meetDo('${id}',0)"><span>今 天 算 了</span></div>`;
+  document.querySelector('#v-social .facewrap .body').firstElementChild.innerHTML='<span>'+c.name+' · '+c.role+'</span>';
+  go('social');
+}
+function meetDo(id,go2){
+  if(!go2) return go('cal');
+  const c=CONFS.find(x=>x.id===id);
+  const before=G.conf[id];
+  G.conf[id]=Math.min(5,G.conf[id]+1);
+  const stat=SOCIALS[Math.floor(Math.random()*SOCIALS.length)];
+  G.social[stat]=Math.min(5,G.social[stat]+1);
+  spendSlot(); go('cal');
+  const up=G.conf[id]>before;
+  addLog(`见了${c.name}，<b>${c.stat} +1</b>${up?`，社群 Lv${G.conf[id]}`:'，但已经到顶了'}。`);
+  pop(c.name, up?('社 群 Lv'+G.conf[id]):'已 经 到 顶 了');
+}
+
+/* ══════════════════════════════════════════════
+   楼层
+   ══════════════════════════════════════════════ */
+function renderFloor(){
+  $('#roomGrid').innerHTML=G.rooms.map((r,i)=>
+    `<div class="roomrow ${r.done?'done':''} ${r.id==='boss'?'boss':''}"
+          style="${r.done?'':'cursor:pointer'}" ${r.done?'':`onclick="enterRoom(${i})"`}>
+      <span><span class="nm">${r.done?'✓ ':''}${r.nm}</span><span class="ds">${r.ds}</span></span>
+      <span class="go"><span class="tag ${r.done?'':'red'}"><span>${r.done?'已清理':'进 去'}</span></span></span></div>`).join('');
+}
+function enterRoom(i){
+  const r=G.rooms[i];
+  if(r.done) return;
+  GAME.sfx('click');
+  r.done=true; spendSlot();
+  addLog(`清理了「${r.nm.replace(/\s/g,'')}」。`);
+  if(r.id==='look'){
+    G.revealed[FOES[0].id]=true; G.revealed[FOES[1].id]=true;
+    G.social['见识']=Math.min(5,G.social['见识']+1);
+    panel('情 报','查看那张纸','你把那张纸翻过来。\n\n背面是用铅笔写的两行小字 —— 两个名字，和它们各自怕什么。',
+      '死穴已记下：韭菜收割者 = 定力　妖股魅魔 = 手速',
+      '· 见识 +1   · 死穴已揭示',
+      [{t:'回 日 历 ▸',fn:()=>{closePanel();go('cal');}}]);
+    return;
+  }
+  if(r.id==='fight') return startBattle(0,'fight');
+  if(r.id==='boss')  return startBattle(1,'boss');
+}
+
+/* ══════════════════════════════════════════════
+   战斗
+   ══════════════════════════════════════════════ */
+let B=null;
+function attrsOf(id){
+  const m=MASKS.find(x=>x.id===id);
+  const a={胆量:2,洞察:2,定力:2,手速:1,运气:1};
+  for(const k in m.mod) a[k]=Math.max(0,a[k]+m.mod[k]);
+  CONFS.forEach(c=>{ a[c.stat]=(a[c.stat]||0)+ (G.conf[c.id]-1); });
+  return a;
+}
+function startBattle(fi,roomId){
+  const f=FOES[fi];
+  B={ f, fi, room:roomId, obs:f.obs*(roomId==='boss'?1.35:1)|0, max:0, used:false, busy:false,
+      locked:false, weak:false, tried:{}, attrs:attrsOf(G.equip) };
+  B.max=B.obs;
+  if(G.revealed[f.id]) B.weak=true;
+  B.alertAdd=roomId==='boss'?35:20;
+  go('battle');
+}
+function renderBattle(){
+  const f=B.f;
+  $('#bFoeArt').style.backgroundImage=`url('${f.img}')`;
+  $('#bFoeName').textContent=f.name;
+  $('#bObs').style.width=Math.max(0,B.obs/B.max*100)+'%';
+  $('#bObsV').textContent=Math.max(0,B.obs)+' / '+B.max;
+  $('#bLock').className='lock'+(B.locked?' on':'');
+  $('#bWeak').className='weak'+(B.weak?'':' unknown');
+  $('#bWeak').innerHTML='<span>'+(B.weak?('死穴 '+f.weak):'死穴 ???')+'</span>';
+  $('#bHp').style.width=Math.max(0,G.hp/G.hpMax*100)+'%';
+  $('#bHpV').textContent=G.hp+'/'+G.hpMax;
+  const m=MASKS.find(x=>x.id===G.equip);
+  $('#bMaskName').textContent=m.name;
+  $('#bMaskSkill').textContent='技能 '+m.skill.name+' · 保证金 '+m.skill.cost;
+
+  const canSkill=G.depot>=m.skill.cost;
+  $('#bRows').innerHTML=MOVES.map((mv,i)=>{
+    const mk=B.weak?(f.weak===mv.attr?'★':''):(B.tried[mv.attr]?'✕':'');
+    return `<div class="row${B.used?' no':''}" onclick="bMove(${i})">
+      <div class="inner"><span class="t">${mv.t}</span><span class="d">${mv.attr} ${mv.dc}</span>
+      <span class="at" style="color:${mk==='★'?'var(--gold)':'var(--red2)'}">${mk||mv.attr}</span></div></div>`;
+  }).join('') + `<div class="row skill${(B.used||!canSkill)?' no':''}" onclick="bSkill()">
+      <div class="inner"><span class="t">${m.skill.name}</span><span class="d">消耗保证金</span>
+      <span class="at">${m.skill.cost}</span></div></div>`;
+}
+function bMove(i){ bResolve({attr:MOVES[i].attr, dc:MOVES[i].dc}); }
+function bSkill(){
+  const m=MASKS.find(x=>x.id===G.equip);
+  if(G.depot<m.skill.cost) return;
+  G.depot-=m.skill.cost;
+  if(m.id==='momentum') return bResolve({attr:'手速',dc:12,force:true});
+  if(m.id==='dealer')   return bResolve({attr:'洞察',dc:10,force:true});
+  if(m.id==='herd'){
+    const w=Math.random()<.6;
+    B.obs-=w?4:0; if(!w) G.hp-=2;
+    B.used=true; renderBattle();
+    return bDone('赌 '+(w?'对 了':'输 了'), w?'它被这一下打乱了。':'人散了，你站在最里面。', w?'· 执念 -4':'· 心态 -2');
+  }
+  if(m.id==='short') return bResolve({attr:'定力',dc:12,mul:2});
+  if(m.id==='value'){
+    G.hp=Math.min(G.hpMax,G.hp+3); B.used=true; renderBattle();
+    return bDone('长 期 持 有','你把软件关了。接下来它怎么吓你都不管用。','· 心态 +3');
+  }
+}
+function bResolve(opt){
+  if(B.busy||B.used) return;
+  B.busy=true; B.used=true; GAME.sfx('click');
+  const res=GAME.roll({attrs:B.attrs},{attr:opt.attr,dc:opt.dc}, opt.force?20:0);
+  const isWeak=(res.pass&&(res.crit||opt.attr===B.f.weak))||(opt.force&&res.pass);
+  let obs=0,hp=0;
+  if(isWeak) obs=(res.crit?4:3)*(opt.mul||1);
+  else if(res.pass) obs=1;
+  else hp=1;
+  B.tried[opt.attr]=true;
+  if(isWeak) B.weak=true;
+  B.obs-=obs; G.hp-=hp;
+  renderBattle();
+  const v = isWeak?(res.crit?'一 字 板':'WEAK!!'):res.pass?'击 中':'失 手';
+  if(res.pass||isWeak) GAME.sfx('ok'); else GAME.sfx('no');
+  const after=()=>bDone(v,
+    isWeak?'你打中了它唯一不想被碰的地方。\n\n它往后缩了半步。':res.pass?'它挡了一下。没碰到该碰的地方。':'你的手穿过去了。',
+    [obs?'执念 -'+obs:'',hp?'心态 -'+hp:''].filter(Boolean).join('   ·   '),
+    isWeak?B.f.why:'');
+  if(isWeak){ B.locked=true; renderBattle(); pop('WEAK!!','套 牢',after); }
+  else after();
+}
+function bDone(v,tx,eff,note){
+  B.busy=false;
+  if(B.obs<=0) return bAllOut();
+  if(G.hp<=0) return bLose();
+  panel(v,'',tx,note||'',eff,[{t:'继 续 ▸',fn:'bNext()'}]);
+}
+function bNext(){
+  closePanel(); GAME.sfx('click');
+  if(B.locked){ B.locked=false; B.used=false; renderBattle(); toast('套牢 · 它这回合动不了'); return; }
+  if(!B.used){ renderBattle(); return; }
+  B.used=false;
+  const dmg=1+(Math.random()<.3?1:0);
+  G.hp-=dmg; renderBattle();
+  if(G.hp<=0) return bLose();
+  toast('它动了 · 心态 -'+dmg);
+}
+function bAllOut(){
+  G.alert=Math.min(100,G.alert+B.alertAdd);
+  const el=$('#allout'); el.classList.add('on'); GAME.sfx('crit');
+  setTimeout(()=>{ el.classList.remove('on'); openTalk(); },2000);
+}
+function bLose(){
+  panel('你 成 了 异 闻','','心态归零。\n\n你坐下了 —— 坐在那个位置上。',
+    '','',[{t:'从 头 再 来',fn:'location.reload()'}]);
+  $('#v-battle').classList.remove('on'); $('#v-end').classList.add('on');
+}
+
+/* ══════════════════════════════════════════════
+   谈判 —— 打赢之后可以收服它
+   ══════════════════════════════════════════════ */
+function openTalk(){
+  const f=B.f;
+  $('#socPor').style.backgroundImage=`url('${f.img}')`;
+  document.querySelector('#v-social .body').firstElementChild.innerHTML='<span>'+f.name+' · 投降</span>';
+  $('#socSay').textContent='它跪在地上，纸片散了一地。\n\n「你……你想干什么？」';
+  $('#socChoices').innerHTML=
+    `<div class="btn gold" onclick="talk(0)"><span>收 下 它 · 得 到 它 的 面 具</span></div>
+     <div class="btn" onclick="talk(1)"><span>让 它 交 代 · 得 到 情 报</span></div>
+     <div class="btn ghost" onclick="talk(2)"><span>放 它 走</span></div>`;
+  go('social');
+}
+function talk(k){
+  GAME.sfx('click');
+  const f=B.f;
+  if(k===0){
+    const newId = f.id==='reaper'?'short':'momentum';
+    if(!G.masks.includes(newId)) G.masks.push(newId);
+    addLog(`打倒了${f.nm.replace(/\s/g,'')}，收下了它的面具。`);
+    panel('收 下 了','','它化成一副面具，落在你手里。\n\n你现在可以戴上它 —— 用它的打法。',
+      '面具「'+MASKS.find(m=>m.id===newId).name+'」已入库',
+      '',[{t:'回 日 历 ▸',fn:()=>{closePanel();afterBattle();}}]);
+  } else if(k===1){
+    FOES.forEach(x=>G.revealed[x.id]=true);
+    G.social['见识']=Math.min(5,G.social['见识']+2);
+    addLog(`放${f.nm.replace(/\s/g,'')}交代了所有死穴，<b>见识 +2</b>。`);
+    panel('情 报','','它交代了两个名字，和它们各自怕什么。',
+      '所有死穴已揭示','· 见识 +2',[{t:'回 日 历 ▸',fn:()=>{closePanel();afterBattle();}}]);
+  } else {
+    G.hp=Math.min(G.hpMax,G.hp+3);
+    addLog(`放走了${f.nm.replace(/\s/g,'')}，<b>心态 +3</b>。`);
+    panel('放 它 走','','你让开了路。\n\n它没有说谢谢，但它记住了。',
+      '','· 心态 +3',[{t:'回 日 历 ▸',fn:()=>{closePanel();afterBattle();}}]);
+  }
+}
+function afterBattle(){
+  if(B.room==='boss') G.bossDown=true;
+  if(B.room==='fight') G.revealed[FOES[1].id]=true;
+  B=null; go('cal');
+}
+
+/* ══════════════════════════════════════════════
+   面具 / 融合
+   ══════════════════════════════════════════════ */
+let fuseSel=[];
+function openMask(){
+  GAME.sfx('click'); fuseSel=[];
+  $('#maskList').innerHTML=G.masks.map(id=>{
+    const m=MASKS.find(x=>x.id===id), on=id===G.equip;
+    return `<div class="pickcard" style="width:240px;${on?'border-color:var(--gold)':''}"
+      onclick="equipMask('${id}')">
+      <div class="nm" style="font-size:16px">${m.name}${on?' · 使用中':''}</div>
+      <div class="ds">${Object.entries(m.mod).map(([k,v])=>k+(v>0?'+':'')+v).join(' ')}<br>技能 ${m.skill.name}</div></div>`;
+  }).join('');
+  renderFuse();
+  $('#maskPanel').classList.add('on');
+}
+function closeMask(){ GAME.sfx('click'); $('#maskPanel').classList.remove('on'); if($('#v-battle').classList.contains('on')) renderBattle(); }
+function equipMask(id){ GAME.sfx('click'); G.equip=id; openMask(); renderCal(); }
+function renderFuse(){
+  $('#fuseBox').innerHTML=G.masks.map(id=>{
+    const m=MASKS.find(x=>x.id===id), on=fuseSel.includes(id);
+    return `<div class="pickcard" style="width:200px;${on?'border-color:var(--gold)':''}"
+      onclick="toggleFuse('${id}')"><div class="nm" style="font-size:15px">${m.name}</div>
+      <div class="ds">${on?'已选中':'点它选中'}</div></div>`;
+  }).join('');
+  $('#fuseBtn').className='btn gold'+(fuseSel.length===2?'':' off');
+}
+function toggleFuse(id){
+  const i=fuseSel.indexOf(id);
+  if(i>=0) fuseSel.splice(i,1);
+  else { if(fuseSel.length>=2) fuseSel.shift(); fuseSel.push(id); }
+  renderFuse();
+}
+$('#fuseBtn').onclick=()=>{
+  if(fuseSel.length!==2) return;
+  GAME.sfx('crit');
+  const [a,b]=fuseSel.map(id=>MASKS.find(x=>x.id===id));
+  const fresh='fused_'+Date.now();
+  const mod={};
+  ['胆量','洞察','定力','手速','运气'].forEach(k=>{
+    const v=Math.round(((a.mod[k]||0)+(b.mod[k]||0))/2)+1;
+    if(v) mod[k]=v;
+  });
+  MASKS.push({ id:fresh, name:'融 合 体', mod, skill:{name:'双 面',cost:3} });
+  G.masks.push(fresh);
+  fuseSel=[];
+  openMask();
+  pop('融 合 完 成','一副新的面具');
+};
+
+/* ══════════════════════════════════════════════
+   结算
+   ══════════════════════════════════════════════ */
+function finish(){
+  const ok=G.bossDown;
+  $('#endT').textContent = ok?'七 天 到 了':'它 长 到 下 一 层 了';
+  $('#endT').style.color = ok?'#fff':'var(--red2)';
+  $('#endD').textContent = ok
+    ? '第七天收盘。\n\n你用了 '+G.slotsUsed+' 个时段，社群最高 Lv'+Math.max(...Object.values(G.conf))+'，手里 '+G.masks.length+' 副面具。\n\n三号厅空了。第八天，电梯会停在下一层。'
+    : '第七天收盘，首领还在。\n\n它没有等你。它顺着楼板爬下去了 —— 下一层的人会替你碰上它。';
+  $('#endStat').innerHTML =
+    SOCIALS.map(k=>k+' '+G.social[k]).join('　') + '<br>' +
+    CONFS.map(c=>c.name+' Lv'+G.conf[c.id]).join('　') + '<br>' +
+    '心态 '+G.hp+'/'+G.hpMax+'　保证金 '+G.depot+'　警戒 '+G.alert+'%';
+  go('end');
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('on'));
+  $('#v-end').classList.add('on');
+}
+
+/* ═══ 启动 ═══ */
+newG(); go('cal');
+
+/* 调试入口：?view=meet|social|floor|battle|boss|talk|mask|end
+   也是给玩家看的「直接跳到某一块」的深链接 */
+(function(){
+  const v=new URLSearchParams(location.search).get('view');
+  if(!v) return;
+  if(v==='meet')   return openMeet();
+  if(v==='social') return meet('zhao');
+  if(v==='floor')  return go('floor');
+  if(v==='battle') return startBattle(0,'fight');
+  if(v==='boss')   return startBattle(1,'boss');
+  if(v==='talk'){ startBattle(0,'fight'); B.obs=0; return openTalk(); }
+  if(v==='mask'){ G.masks=['value','short','momentum']; return openMask(); }
+  if(v==='end'){ G.bossDown=true; G.slotsUsed=9; G.day=8; G.masks=['value','short']; return finish(); }
+})();
+</script>
+</body>
+</html>
